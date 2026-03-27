@@ -12,8 +12,17 @@ export default async function handler(req, res) {
   const owner = process.env.GITHUB_REPO_OWNER;
   const repo  = process.env.GITHUB_PROPOSALS_REPO || "bonadio-proposals";
 
-  if (!token || !owner) {
-    return res.status(500).json({ error: "GITHUB_TOKEN ou GITHUB_REPO_OWNER não configurados" });
+  if (!token) {
+    return res.status(500).json({
+      error: "GITHUB_TOKEN não configurado no Vercel. Vá em Settings → Environment Variables e adicione GITHUB_TOKEN.",
+      setup: true,
+    });
+  }
+  if (!owner) {
+    return res.status(500).json({
+      error: "GITHUB_REPO_OWNER não configurado no Vercel. Adicione GITHUB_REPO_OWNER com o valor 'marketingavestra'.",
+      setup: true,
+    });
   }
 
   const filePath = `${slug}.html`;
@@ -32,6 +41,16 @@ export default async function handler(req, res) {
     if (existing.ok) {
       const data = await existing.json();
       sha = data.sha;
+    } else if (existing.status === 401) {
+      return res.status(500).json({
+        error: "GITHUB_TOKEN inválido ou expirado. Gere um novo token em github.com → Settings → Developer settings → Personal access tokens.",
+        setup: true,
+      });
+    } else if (existing.status === 404 && !existing.url.includes("/contents/")) {
+      return res.status(500).json({
+        error: `Repositório '${owner}/${repo}' não encontrado. Verifique se GITHUB_REPO_OWNER está correto e o repo existe.`,
+        setup: true,
+      });
     }
   } catch (_) {}
 
@@ -51,12 +70,24 @@ export default async function handler(req, res) {
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    return res.status(500).json({ error: err.message || "Erro ao fazer push para GitHub" });
+    const status = response.status;
+    let message = err.message || "Erro ao fazer push para GitHub";
+
+    if (status === 401) {
+      message = "Token GitHub inválido ou sem permissão de escrita no repositório.";
+    } else if (status === 404) {
+      message = `Repositório '${owner}/${repo}' não encontrado. Verifique GITHUB_REPO_OWNER e GITHUB_PROPOSALS_REPO.`;
+    } else if (status === 422) {
+      message = "Erro de validação do GitHub — pode ser conflito de SHA. Tente novamente.";
+    }
+
+    return res.status(500).json({ error: message });
   }
 
   const domain = process.env.PROPOSALS_DOMAIN || "www.sala.bonadio.site";
   return res.status(200).json({
     url: `https://${domain}/${slug}`,
     updated: !!sha,
+    repo: `${owner}/${repo}`,
   });
 }

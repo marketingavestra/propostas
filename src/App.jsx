@@ -365,8 +365,9 @@ export default function PropLabIntelligence() {
   const [apiError, setApiError] = useState(null);
   const [genStepIdx, setGenStepIdx] = useState(-1);
   const [genSteps, setGenSteps] = useState([]);
-  const [deployStatus, setDeployStatus] = useState(null); // null | "loading" | "success" | "error"
+  const [deployStatus, setDeployStatus] = useState(null); // null | "loading" | "success" | string(error)
   const [deployedUrl, setDeployedUrl] = useState("");
+  const [deployIsSetupError, setDeployIsSetupError] = useState(false);
   const iframeRef = useRef(null);
 
   // ─── SLUG HELPER ─────────────────────────────────
@@ -381,6 +382,7 @@ export default function PropLabIntelligence() {
   // ─── DEPLOY TO DOMAIN ────────────────────────────
   const deployProposal = useCallback(async () => {
     setDeployStatus("loading");
+    setDeployIsSetupError(false);
     const slug = toSlug(lead.nome);
     try {
       const response = await fetch("/api/deploy-proposal", {
@@ -389,7 +391,10 @@ export default function PropLabIntelligence() {
         body: JSON.stringify({ slug, html: finalHTML }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || `Erro ${response.status}`);
+      if (!response.ok) {
+        if (data.setup) setDeployIsSetupError(true);
+        throw new Error(data.error || `Erro ${response.status}`);
+      }
       setDeployedUrl(data.url);
       setDeployStatus("success");
     } catch (err) {
@@ -1041,9 +1046,20 @@ REGRAS CRÍTICAS:
         )}
 
         {typeof deployStatus === "string" && deployStatus !== "loading" && deployStatus !== "success" && (
-          <Glass style={{ padding: "14px 20px", marginBottom: 20, borderLeft: `3px solid ${RED}` }}>
-            <div style={{ fontSize: 12, color: RED, fontWeight: 600 }}>Erro no deploy</div>
-            <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{deployStatus}</div>
+          <Glass style={{ padding: "18px 20px", marginBottom: 20, borderLeft: `3px solid ${RED}` }}>
+            <div style={{ fontSize: 12, color: RED, fontWeight: 700, marginBottom: 6 }}>
+              {deployIsSetupError ? "⚙️ Configuração necessária no Vercel" : "Erro no deploy"}
+            </div>
+            <div style={{ fontSize: 12, color: "#ccc", marginBottom: deployIsSetupError ? 14 : 0 }}>{deployStatus}</div>
+            {deployIsSetupError && (
+              <div style={{ fontSize: 12, color: "#aaa", lineHeight: 1.8, background: "rgba(255,255,255,0.04)", padding: "12px 14px", borderRadius: 8 }}>
+                <strong style={{ color: "#fff" }}>Como configurar (1 vez só):</strong><br/>
+                1. Acesse <strong style={{ color: ACCENT_LIGHT }}>vercel.com → seu projeto proplab-app → Settings → Environment Variables</strong><br/>
+                2. Adicione <code style={{ background: "rgba(255,255,255,0.1)", padding: "1px 5px", borderRadius: 4 }}>GITHUB_TOKEN</code> — gere em: github.com → Settings → Developer settings → Personal access tokens → Fine-grained → repo "bonadio-proposals" com permissão <em>Contents: Read and write</em><br/>
+                3. Adicione <code style={{ background: "rgba(255,255,255,0.1)", padding: "1px 5px", borderRadius: 4 }}>GITHUB_REPO_OWNER</code> = <strong>marketingavestra</strong><br/>
+                4. Clique "Save" e aguarde ~1 min para o Vercel reiniciar as funções
+              </div>
+            )}
           </Glass>
         )}
 
