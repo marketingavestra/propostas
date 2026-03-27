@@ -380,15 +380,16 @@ export default function PropLabIntelligence() {
       .replace(/^-|-$/g, "");
 
   // ─── DEPLOY TO DOMAIN ────────────────────────────
-  const deployProposal = useCallback(async () => {
+  const deployProposal = useCallback(async (htmlOverride) => {
     setDeployStatus("loading");
     setDeployIsSetupError(false);
     const slug = toSlug(lead.nome);
+    const html = htmlOverride || finalHTML;
     try {
       const response = await fetch("/api/deploy-proposal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, html: finalHTML }),
+        body: JSON.stringify({ slug, html }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -743,11 +744,13 @@ REGRAS CRÍTICAS:
       const htmlClean = text.replace(/```html|```/g, "").trim();
       setFinalHTML(htmlClean);
       setStep(4);
+      // Auto-publish to domain
+      deployProposal(htmlClean);
     } catch (err) {
       setApiError(err.message);
     }
     setGenerating(false);
-  }, [propostaEditada, lead, calendlyUrl, callClaude]);
+  }, [propostaEditada, lead, calendlyUrl, callClaude, deployProposal]);
 
   // ─── RENDER STEPS ───────────────────────────────
   const renderStep0 = () => (
@@ -1030,24 +1033,29 @@ REGRAS CRÍTICAS:
             window.open(url, "_blank");
           }} icon="file">Baixar PDF</PulseBtn>
           <PulseBtn small onClick={() => navigator.clipboard.writeText(finalHTML)} icon="file">Copiar HTML</PulseBtn>
-          <PulseBtn
-            small
-            onClick={deployProposal}
-            disabled={deployStatus === "loading"}
-            icon="send"
-            style={deployStatus === "success" ? { background: GREEN } : {}}
-          >
-            {deployStatus === "loading" ? "Publicando..." : deployStatus === "success" ? "Publicado ✓" : "Publicar em sala.bonadio.site"}
-          </PulseBtn>
+          <PulseBtn small onClick={() => {
+            const printCSS = `<style>@media print{nav,header,.gradient-blur,[class*="fixed"]{display:none!important}body{background:#0a1128!important}section{break-inside:avoid}}</style>`;
+            const printScript = `<script>window.onload=function(){setTimeout(function(){window.print()},800)}<\/script>`;
+            const printHTML = finalHTML.replace("</head>", printCSS + "</head>").replace("</body>", printScript + "</body>");
+            const blob = new Blob([printHTML], { type: "text/html" });
+            const url = URL.createObjectURL(blob);
+            window.open(url, "_blank");
+          }} icon="download">Baixar PDF</PulseBtn>
         </div>
 
         {/* Deploy status */}
+        {deployStatus === "loading" && (
+          <Glass style={{ padding: "14px 20px", marginBottom: 20, borderLeft: `3px solid ${ACCENT}`, display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 16, height: 16, border: `2px solid ${ACCENT}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+            <div style={{ fontSize: 13, color: ACCENT }}>Publicando proposta automaticamente...</div>
+          </Glass>
+        )}
         {deployStatus === "success" && (
           <Glass style={{ padding: "16px 20px", marginBottom: 20, borderLeft: `3px solid ${GREEN}`, display: "flex", alignItems: "center", gap: 16 }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, color: GREEN, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Proposta publicada</div>
-              <a href={deployedUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, color: ACCENT_LIGHT, fontWeight: 500, textDecoration: "none", wordBreak: "break-all" }}>{deployedUrl}</a>
-              <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>Ativa em ~30s após o deploy automático do Vercel</div>
+              <div style={{ fontSize: 11, color: GREEN, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Proposta publicada automaticamente</div>
+              <a href={deployedUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, color: ACCENT_LIGHT, fontWeight: 600, textDecoration: "none", wordBreak: "break-all" }}>{deployedUrl}</a>
+              <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>Link ativo em ~30s — envie direto para o lead</div>
             </div>
             <PulseBtn small onClick={() => navigator.clipboard.writeText(deployedUrl)} icon="link">Copiar link</PulseBtn>
           </Glass>
@@ -1118,6 +1126,7 @@ REGRAS CRÍTICAS:
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@200;400;600;700;800&display=swap');
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: ${BG}; }
