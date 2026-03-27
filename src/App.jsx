@@ -1010,7 +1010,7 @@ REGRAS CRÍTICAS:
       <div>
         <SectionHead num="05" title="Proposta" accent="Final" subtitle="Preview e download da proposta no design Avestra Blue" />
 
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 24 }}>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 24, flexWrap: "wrap" }}>
           <PulseBtn small onClick={() => setShowPreview(!showPreview)} icon="eye">{showPreview ? "Fechar Preview" : "Ver Preview"}</PulseBtn>
           <PulseBtn small onClick={() => {
             const blob = new Blob([finalHTML], { type: "text/html" });
@@ -1021,6 +1021,14 @@ REGRAS CRÍTICAS:
             a.click();
             URL.revokeObjectURL(url);
           }} icon="download">Baixar HTML</PulseBtn>
+          <PulseBtn small onClick={() => {
+            const printCSS = `<style>@media print{nav,header,.gradient-blur,[class*="fixed"]{display:none!important}body{background:#0a1128!important}section{break-inside:avoid}}</style>`;
+            const printScript = `<script>window.onload=function(){setTimeout(function(){window.print()},800)}<\/script>`;
+            const printHTML = finalHTML.replace("</head>", printCSS + "</head>").replace("</body>", printScript + "</body>");
+            const blob = new Blob([printHTML], { type: "text/html" });
+            const url = URL.createObjectURL(blob);
+            window.open(url, "_blank");
+          }} icon="file">Baixar PDF</PulseBtn>
           <PulseBtn small onClick={() => navigator.clipboard.writeText(finalHTML)} icon="file">Copiar HTML</PulseBtn>
           <PulseBtn
             small
