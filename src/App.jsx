@@ -1027,7 +1027,7 @@ REGRAS CRÍTICAS:
             onClick={deployProposal}
             disabled={deployStatus === "loading"}
             icon="send"
-            style={{ background: deployStatus === "success" ? GREEN : undefined }}
+            style={deployStatus === "success" ? { background: GREEN } : {}}
           >
             {deployStatus === "loading" ? "Publicando..." : deployStatus === "success" ? "Publicado ✓" : "Publicar em sala.bonadio.site"}
           </PulseBtn>
