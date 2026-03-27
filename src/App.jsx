@@ -739,7 +739,7 @@ REGRAS CRÍTICAS:
 
     setApiError(null);
     try {
-      const text = await callClaude(htmlPrompt, 8000);
+      const text = await callClaude(htmlPrompt, 16000);
       const htmlClean = text.replace(/```html|```/g, "").trim();
       setFinalHTML(htmlClean);
       setStep(4);
