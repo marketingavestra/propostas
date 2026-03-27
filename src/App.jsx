@@ -313,10 +313,27 @@ const StepNav = ({ steps, current, onSelect }) => (
 );
 
 // ─── LOADING SPINNER ──────────────────────────────────
-const Spinner = ({ text = "Processando..." }) => (
+const Spinner = ({ text = "Processando...", steps = [], stepIdx = -1 }) => (
   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: 40 }}>
     <div style={{ width: 40, height: 40, borderRadius: 20, border: `3px solid ${BORDER}`, borderTopColor: ACCENT, animation: "spin 1s linear infinite" }} />
     <span style={{ fontSize: 13, color: "#888", fontStyle: "italic" }}>{text}</span>
+    {steps.length > 0 && (
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8, minWidth: 260 }}>
+        {steps.map((s, i) => {
+          const done = i < stepIdx;
+          const active = i === stepIdx;
+          return (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, opacity: done ? 0.6 : active ? 1 : 0.3 }}>
+              <div style={{ width: 22, height: 22, borderRadius: 11, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, transition: "all 0.4s", background: done ? GREEN : active ? ACCENT : "rgba(255,255,255,0.06)", border: `1px solid ${done ? GREEN : active ? ACCENT : "rgba(255,255,255,0.1)"}`, color: done || active ? "#fff" : "#555" }}>
+                {done ? "✓" : i + 1}
+              </div>
+              <span style={{ fontSize: 12, color: done ? GREEN : active ? "#e0e0e0" : "#555", transition: "color 0.4s" }}>{s.label}</span>
+              {active && <div style={{ width: 6, height: 6, borderRadius: 3, background: ACCENT, animation: "blink 1s infinite", marginLeft: 4 }} />}
+            </div>
+          );
+        })}
+      </div>
+    )}
     <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
   </div>
 );
@@ -346,6 +363,8 @@ export default function PropLabIntelligence() {
   const [propostaEditada, setPropostaEditada] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [apiError, setApiError] = useState(null);
+  const [genStepIdx, setGenStepIdx] = useState(-1);
+  const [genSteps, setGenSteps] = useState([]);
   const iframeRef = useRef(null);
 
   // ─── CLAUDE API HELPER ───────────────────────────
@@ -502,32 +521,84 @@ PRINCÍPIOS:
   }, [lead, research, callClaude]);
 
   // ─── ANALYZE PROPOSAL ──────────────────────────
+  const ANALYST_STEPS = [
+    { label: "Closer Analyst — closability e precificação" },
+    { label: "Copywriter Analyst — copy, tom e CTA" },
+    { label: "Devil's Advocate — vulnerabilidades e riscos" },
+    { label: "Proposal Analyst — arco narrativo e estrutura" },
+  ];
+
   const analyzeProposal = useCallback(async () => {
     setGenerating(true);
+    setGenSteps(ANALYST_STEPS);
+    setGenStepIdx(0);
     setGenStatus("Rodando análise com 4 especialistas...");
+
+    const timers = [
+      setTimeout(() => setGenStepIdx(1), 5000),
+      setTimeout(() => setGenStepIdx(2), 10000),
+      setTimeout(() => setGenStepIdx(3), 15000),
+    ];
 
     const propostaTruncada = propostaEditada.slice(0, 3500);
 
-    const analysisPrompt = `Analise esta proposta como 4 especialistas. Responda APENAS JSON válido, sem markdown.
+    const analysisPrompt = `Você vai assumir 4 papéis de analista para revisar esta proposta. Responda APENAS com JSON válido, sem markdown, sem backticks.
 
-Lead: ${lead.nome} | ${lead.nicho} | ${lead.cidade} | Score digital: ${research?.score_presenca_digital}/100
+BRIEFING: Lead ${lead.nome}, ${lead.nicho}, ${lead.cidade}. Score presença digital: ${research?.score_presenca_digital}/100.
 
 PROPOSTA:
 ${propostaTruncada}
 
-JSON (pt-BR):
-{"closer":{"nota":0,"veredito":"","fortes":[""],"fracos":[""],"recomendacoes":[""]},"copywriter":{"nota":0,"veredito":"","fortes":[""],"fracos":[""],"recomendacoes":[""]},"devils_advocate":{"nota":0,"veredito":"","vulnerabilidades":[{"problema":"","severidade":"CRÍTICO|IMPORTANTE|MENOR","fix":""}],"risco_geral":""},"proposal_analyst":{"nota":0,"veredito":"","arco_narrativo":"","secoes_reordenar":[""],"top_3_mudancas":[""]},"nota_geral":0,"pronta_para_enviar":true,"resumo_executivo":""}`;
+Para CADA analista, forneça nota (1-10), pontos fortes, pontos fracos, e recomendações. Responda em pt-BR.
+
+JSON exato:
+{
+  "closer": {
+    "nota": 8,
+    "veredito": "frase curta",
+    "fortes": ["ponto 1", "ponto 2"],
+    "fracos": ["ponto 1", "ponto 2"],
+    "recomendacoes": ["rec 1", "rec 2"]
+  },
+  "copywriter": {
+    "nota": 8,
+    "veredito": "frase curta",
+    "fortes": ["ponto 1", "ponto 2"],
+    "fracos": ["ponto 1", "ponto 2"],
+    "recomendacoes": ["rec 1", "rec 2"]
+  },
+  "devils_advocate": {
+    "nota": 8,
+    "veredito": "frase curta",
+    "vulnerabilidades": [{"problema": "desc", "severidade": "CRÍTICO", "fix": "sugestão"}],
+    "risco_geral": "frase"
+  },
+  "proposal_analyst": {
+    "nota": 8,
+    "veredito": "frase curta",
+    "arco_narrativo": "avaliação",
+    "secoes_reordenar": ["sugestão"],
+    "top_3_mudancas": ["mudança 1", "mudança 2", "mudança 3"]
+  },
+  "nota_geral": 8,
+  "pronta_para_enviar": true,
+  "resumo_executivo": "frase resumo"
+}`;
 
     setApiError(null);
 
     try {
-      const text = await callClaude(analysisPrompt, 1800);
+      const text = await callClaude(analysisPrompt, 2500);
+      timers.forEach(clearTimeout);
       const clean = text.replace(/```json|```/g, "").trim();
       setAnalysis(JSON.parse(clean));
       setStep(3);
     } catch (err) {
+      timers.forEach(clearTimeout);
       setApiError(err.message);
     }
+    setGenSteps([]);
+    setGenStepIdx(-1);
     setGenerating(false);
   }, [lead, research, propostaEditada, callClaude]);
 
@@ -1014,7 +1085,7 @@ REGRAS CRÍTICAS:
 
         <StepNav steps={STEPS} current={step} onSelect={setStep} />
 
-        {generating && <Spinner text={genStatus} />}
+        {generating && <Spinner text={genStatus} steps={genSteps} stepIdx={genStepIdx} />}
         {!generating && step === 0 && renderStep0()}
         {!generating && step === 1 && renderStep1()}
         {!generating && step === 2 && renderStep2()}
