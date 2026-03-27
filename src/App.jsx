@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 // ─── CONSTANTS ────────────────────────────────────────
-const ACCENT = "#ef233c";
-const ACCENT_LIGHT = "#ff4d5a";
-const ACCENT_HOVER = "#ff1a2b";
+const ACCENT = "#5070b0";
+const ACCENT_LIGHT = "#90c0e0";
+const ACCENT_HOVER = "#6090c0";
 const BG = "#0a0a0a";
 const BG_CARD = "rgba(255,255,255,0.03)";
 const BORDER = "rgba(255,255,255,0.08)";
@@ -60,9 +60,9 @@ const AnimStar = () => (
 const AnimBG = () => (
   <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
     <AnimStar />
-    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, #1a0505, #000)" }} />
-    <div style={{ position: "absolute", top: "15%", left: "50%", transform: "translateX(-50%)", width: 800, height: 800, borderRadius: "50%", background: `radial-gradient(circle, rgba(239,35,60,0.08) 0%, transparent 70%)`, filter: "blur(80px)" }} />
-    <div style={{ position: "absolute", bottom: 0, right: "10%", width: 600, height: 600, background: `radial-gradient(ellipse, rgba(239,35,60,0.05) 0%, transparent 70%)`, filter: "blur(100px)" }} />
+    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, #0a1128, #000)" }} />
+    <div style={{ position: "absolute", top: "15%", left: "50%", transform: "translateX(-50%)", width: 800, height: 800, borderRadius: "50%", background: `radial-gradient(circle, rgba(80,112,176,0.12) 0%, transparent 70%)`, filter: "blur(80px)" }} />
+    <div style={{ position: "absolute", bottom: 0, right: "10%", width: 600, height: 600, background: `radial-gradient(ellipse, rgba(80,112,176,0.08) 0%, transparent 70%)`, filter: "blur(100px)" }} />
     <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
     {/* Simple star simulation */}
     <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "2000px", background: "transparent", opacity: 0.4, animation: "animStar 100s linear infinite", backgroundImage: "radial-gradient(1px 1px at 20px 30px, #fff, transparent), radial-gradient(1.5px 1.5px at 150px 70px, #fff, transparent), radial-gradient(1px 1px at 200px 300px, #fff, transparent)" }} />
@@ -81,10 +81,10 @@ const Glass = ({ children, style = {}, hover = false, onClick, className = "" })
       style={{
         background: BG_CARD,
         backdropFilter: "blur(10px)",
-        border: `1px solid ${hovered && hover ? "rgba(239,35,60,0.35)" : BORDER}`,
+        border: `1px solid ${hovered && hover ? "rgba(80,112,176,0.45)" : BORDER}`,
         borderRadius: 20,
         transition: "all 0.4s cubic-bezier(0.4,0,0.2,1)",
-        boxShadow: hovered && hover ? "0 0 60px rgba(239,35,60,0.15)" : "none",
+        boxShadow: hovered && hover ? "0 0 60px rgba(80,112,176,0.2)" : "none",
         cursor: onClick ? "pointer" : "default",
         ...style,
       }}
@@ -104,7 +104,7 @@ const PulseBtn = ({ children, onClick, disabled, small, icon, style = {} }) => {
       onMouseEnter={() => setH(true)}
       onMouseLeave={() => setH(false)}
       style={{
-        background: disabled ? "rgba(239,35,60,0.15)" : h ? ACCENT_HOVER : ACCENT,
+        background: disabled ? "rgba(80,112,176,0.15)" : h ? ACCENT_HOVER : ACCENT,
         color: "#fff",
         border: "none",
         borderRadius: small ? 10 : 14,
@@ -153,7 +153,7 @@ const Input = ({ label, value, onChange, placeholder, type = "text", icon, multi
           style={{
             width: "100%",
             background: "rgba(255,255,255,0.03)",
-            border: `1px solid ${focused ? "rgba(239,35,60,0.4)" : BORDER}`,
+            border: `1px solid ${focused ? "rgba(80,112,176,0.5)" : BORDER}`,
             borderRadius: 12,
             padding: icon ? "12px 14px 12px 40px" : "12px 14px",
             color: "#e0e0e0",
@@ -184,7 +184,7 @@ const Select = ({ label, value, onChange, options, icon }) => {
         style={{
           width: "100%",
           background: "rgba(255,255,255,0.03)",
-          border: `1px solid ${focused ? "rgba(239,35,60,0.4)" : BORDER}`,
+          border: `1px solid ${focused ? "rgba(80,112,176,0.5)" : BORDER}`,
           borderRadius: 12,
           padding: "12px 14px",
           color: "#e0e0e0",
@@ -249,7 +249,7 @@ const SectionHead = ({ num, title, subtitle, accent }) => (
   <div style={{ textAlign: "center", marginBottom: 40 }}>
     <span style={{ display: "inline-block", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.3em", fontWeight: 600, marginBottom: 12, color: ACCENT }}>Etapa {num}</span>
     <h2 style={{ fontFamily: "'Manrope', sans-serif", fontSize: "clamp(1.5rem, 4vw, 2.5rem)", fontWeight: 700, color: "#fff", marginBottom: 8, lineHeight: 1.2 }}>
-      {title} {accent && <span style={{ background: `linear-gradient(135deg, #fff, ${ACCENT}, #800)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{accent}</span>}
+      {title} {accent && <span style={{ background: `linear-gradient(135deg, #fff, ${ACCENT}, #204080)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{accent}</span>}
     </h2>
     {subtitle && <p style={{ color: "#888", fontWeight: 300, fontSize: 14, maxWidth: 600, margin: "0 auto" }}>{subtitle}</p>}
     <div style={{ width: 64, height: 2, background: ACCENT, margin: "20px auto 0", opacity: 0.5 }} />
@@ -307,8 +307,8 @@ const StepNav = ({ steps, current, onSelect }) => (
           style={{
             display: "flex", alignItems: "center", gap: 8,
             padding: "10px 16px", borderRadius: 12,
-            background: active ? "rgba(239,35,60,0.12)" : "transparent",
-            border: `1px solid ${active ? "rgba(239,35,60,0.3)" : "transparent"}`,
+            background: active ? "rgba(80,112,176,0.15)" : "transparent",
+            border: `1px solid ${active ? "rgba(80,112,176,0.4)" : "transparent"}`,
             cursor: done ? "pointer" : "default",
             transition: "all 0.3s", flexShrink: 0,
           }}
@@ -316,9 +316,9 @@ const StepNav = ({ steps, current, onSelect }) => (
           <div style={{
             width: 24, height: 24, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 11, fontWeight: 700,
-            background: done ? ACCENT : active ? "rgba(239,35,60,0.2)" : "rgba(255,255,255,0.05)",
+            background: done ? ACCENT : active ? "rgba(80,112,176,0.25)" : "rgba(255,255,255,0.05)",
             color: done ? "#fff" : active ? ACCENT : "#555",
-            border: `1px solid ${done ? ACCENT : active ? "rgba(239,35,60,0.4)" : "rgba(255,255,255,0.08)"}`,
+            border: `1px solid ${done ? ACCENT : active ? "rgba(80,112,176,0.5)" : "rgba(255,255,255,0.08)"}`,
           }}>
             {done ? <Icon d={icons.check} color={BG} size={12} /> : i + 1}
           </div>
@@ -629,16 +629,16 @@ JSON exato (sem markdown):
   // ─── GENERATE FINAL HTML ────────────────────────
   const generateFinalHTML = useCallback(async () => {
     setGenerating(true);
-    setGenStatus("Montando proposta no design Avestra...");
+    setGenStatus("Montando proposta no design Avestra Blue...");
 
-    const avestralCSS = `*, *::before, *::after { box-sizing: border-box; }
-        :root { --accent: #6090c0; --accent-deep: #204080; --accent-mid: #3060a0; --accent-light: #90c0e0; --accent-glow: rgba(96, 144, 192, 0.5); --cream: #e0e0d0; }
+    const blueAvestraCSS = `*, *::before, *::after { box-sizing: border-box; }
+        :root { --accent-blue: #5070b0; --accent-blue-glow: rgba(80, 112, 176, 0.5); }
         * { scroll-behavior: smooth; }
         @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes border-spin { from { --gradient-angle: 0deg; } to { --gradient-angle: 360deg; } }
         @keyframes shimmer { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
         @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(96, 144, 192, 0.2); } 50% { box-shadow: 0 0 40px rgba(96, 144, 192, 0.4); } }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(80, 112, 176, 0.2); } 50% { box-shadow: 0 0 40px rgba(80, 112, 176, 0.4); } }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
         @keyframes count-up { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
         @keyframes slide-in-left { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
@@ -647,39 +647,33 @@ JSON exato (sem markdown):
         .animate-fade-up { animation: fade-in-up 0.8s ease-out forwards; opacity: 0; }
         .font-manrope { font-family: 'Manrope', sans-serif; }
         .font-inter { font-family: 'Inter', sans-serif; }
-        .shiny-cta { --gradient-angle: 0deg; position: relative; overflow: hidden; border-radius: 9999px; padding: 1rem 2.5rem; background: linear-gradient(#050d1a, #050d1a) padding-box, conic-gradient(from var(--gradient-angle), transparent 0%, #3060a0 5%, #6090c0 15%, #90c0e0 30%, transparent 40%, transparent 100%) border-box; border: 2px solid transparent; cursor: pointer; isolation: isolate; animation: border-spin 2.5s linear infinite; }
-        .shiny-cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, white 0.5px, transparent 0); background-size: 4px 4px; opacity: 0.08; z-index: 0; }
-        .stars-1 { box-shadow: 234px 124px #b0c0d0, 654px 345px #e0e0d0, 876px 12px #f0f0f0, 1200px 800px #b0c0d0, 400px 1500px #e0e0d0, 1800px 200px #f0f0f0, 100px 1000px #b0c0d0, 900px 1900px #e0e0d0, 500px 600px #f0f0f0, 1400px 100px #b0c0d0, 300px 400px #e0e0d0, 1600px 1200px #f0f0f0, 50px 300px #b0c0d0, 750px 1100px #e0e0d0, 1100px 1600px #f0f0f0, 1700px 700px #b0c0d0, 200px 1800px #e0e0d0, 950px 50px #f0f0f0; }
-        .stars-2 { box-shadow: 123px 456px #b0c0d0, 789px 234px #e0e0d0, 456px 890px #f0f0f0, 1100px 300px #b0c0d0, 200px 1200px #e0e0d0, 1500px 500px #f0f0f0, 600px 1700px #b0c0d0, 1300px 900px #e0e0d0, 350px 750px #f0f0f0, 850px 1400px #b0c0d0, 1650px 1050px #e0e0d0; }
-        .stars-3 { box-shadow: 50px 50px rgba(144,192,224,0.4), 800px 400px rgba(96,144,192,0.3), 1400px 1000px rgba(144,192,224,0.35), 300px 1300px rgba(80,112,176,0.2), 1000px 200px rgba(96,144,192,0.3); }
-        .gradient-blur { position: fixed; z-index: 40; inset: 0 0 auto 0; height: 120px; pointer-events: none; background: linear-gradient(to bottom, rgba(2,8,20,0.9), transparent); backdrop-filter: blur(8px); mask-image: linear-gradient(to bottom, black, transparent); }
+        .shiny-cta { --gradient-angle: 0deg; position: relative; overflow: hidden; border-radius: 9999px; padding: 1rem 2.5rem; background: linear-gradient(#000000, #000000) padding-box, conic-gradient(from var(--gradient-angle), transparent 0%, #5070b0 5%, #5070b0 15%, #5070b0 30%, transparent 40%, transparent 100%) border-box; border: 2px solid transparent; cursor: pointer; isolation: isolate; animation: border-spin 2.5s linear infinite; }
+        .shiny-cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, white 0.5px, transparent 0); background-size: 4px 4px; opacity: 0.1; z-index: 0; }
+        .stars-1 { box-shadow: 234px 124px #fff, 654px 345px #fff, 876px 12px #fff, 1200px 800px #fff, 400px 1500px #fff, 1800px 200px #fff, 100px 1000px #fff, 900px 1900px #fff, 500px 600px #fff, 1400px 100px #fff, 300px 400px #fff, 1600px 1200px #fff, 50px 300px #fff, 750px 1100px #fff, 1100px 1600px #fff, 1700px 700px #fff, 200px 1800px #fff, 950px 50px #fff; }
+        .stars-2 { box-shadow: 123px 456px #fff, 789px 234px #fff, 456px 890px #fff, 1100px 300px #fff, 200px 1200px #fff, 1500px 500px #fff, 600px 1700px #fff, 1300px 900px #fff, 350px 750px #fff, 850px 1400px #fff, 1650px 1050px #fff; }
+        .stars-3 { box-shadow: 50px 50px rgba(80,112,176,0.3), 800px 400px rgba(80,112,176,0.2), 1400px 1000px rgba(80,112,176,0.25), 300px 1300px rgba(80,112,176,0.15), 1000px 200px rgba(80,112,176,0.2); }
+        .gradient-blur { position: fixed; z-index: 40; inset: 0 0 auto 0; height: 120px; pointer-events: none; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); backdrop-filter: blur(8px); mask-image: linear-gradient(to bottom, black, transparent); }
         .selection-blue::selection { background: #5070b0; color: white; }
-        .text-stroke { -webkit-text-stroke: 1px rgba(176, 192, 208, 0.15); color: transparent; }
+        .text-stroke { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1); color: transparent; }
         .pilar-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .pilar-card:hover { transform: translateY(-4px); border-color: rgba(96, 144, 192, 0.4); box-shadow: 0 8px 40px rgba(80, 112, 176, 0.15); }
+        .pilar-card:hover { transform: translateY(-4px); border-color: rgba(80, 112, 176, 0.3); }
         .timeline-line { position: relative; }
         .timeline-line::before { content: ''; position: absolute; left: 24px; top: 60px; bottom: -20px; width: 2px; background: linear-gradient(to bottom, #5070b0, transparent); }
         .timeline-line:last-child::before { display: none; }
         .price-slash { position: relative; }
-        .price-slash::after { content: ''; position: absolute; left: -5%; top: 50%; width: 110%; height: 3px; background: #6090c0; transform: rotate(-8deg); }
+        .price-slash::after { content: ''; position: absolute; left: -5%; top: 50%; width: 110%; height: 3px; background: #5070b0; transform: rotate(-8deg); }
         .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
-        .glow-number { text-shadow: 0 0 30px rgba(96, 144, 192, 0.6), 0 0 60px rgba(144, 192, 224, 0.25); }
-        .metric-card { background: linear-gradient(135deg, rgba(80, 112, 176, 0.08), transparent); border: 1px solid rgba(96, 144, 192, 0.15); }
-        .section-divider { background: linear-gradient(90deg, transparent, rgba(96, 144, 192, 0.4), transparent); height: 1px; }
+        .glow-number { text-shadow: 0 0 30px rgba(80, 112, 176, 0.5), 0 0 60px rgba(80, 112, 176, 0.2); }
+        .metric-card { background: linear-gradient(135deg, rgba(80, 112, 176, 0.05), transparent); }
+        .section-divider { background: linear-gradient(90deg, transparent, rgba(80, 112, 176, 0.3), transparent); height: 1px; }
         .compare-table td, .compare-table th { padding: 12px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
-        .compare-table th { color: #90c0e0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px; }
+        .compare-table th { color: #5070b0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px; }
         .compare-table .bad { color: #ef4444; } .compare-table .good { color: #22c55e; }
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #020810; } ::-webkit-scrollbar-thumb { background: #3060a0; border-radius: 3px; }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #000; } ::-webkit-scrollbar-thumb { background: #5070b0; border-radius: 3px; }
         @media (max-width: 768px) { .pilares-grid { grid-template-columns: 1fr !important; } }`;
 
-    const htmlPrompt = `Você é um desenvolvedor front-end especializado em landing pages premium. Gere uma página HTML completa no design AVESTRA (dark navy blue, estilo moderno com estrelas animadas) para a proposta abaixo.
-
-PALETA DE CORES DA AGÊNCIA AVESTRA:
-- Fundos escuros: #204080, #306090, #3060a0
-- Accent principal: #5070b0, #6090c0
-- Destaque claro: #90c0e0
-- Neutros: #b0c0d0, #e0e0d0, #f0f0f0
+    const htmlPrompt = `Você é um desenvolvedor front-end especializado em landing pages premium. Gere uma página HTML completa no design AVESTRA BLUE (dark navy/blue palette, estilo moderno com estrelas animadas) para a proposta abaixo.
 
 CONTEÚDO DA PROPOSTA (markdown):
 ${propostaEditada}
@@ -693,7 +687,7 @@ DADOS DO LEAD:
 CALENDLY URL: ${calendlyUrl}
 
 CSS OBRIGATÓRIO (use exatamente este CSS no <style>, não omita nada):
-${avestralCSS}
+${pulseCSS}
 
 ESTRUTURA HTML OBRIGATÓRIA:
 1. <head> com:
@@ -702,31 +696,29 @@ ESTRUTURA HTML OBRIGATÓRIA:
    - Google Fonts: Manrope (200;400;600;700;800) + Inter (300;400;500;600;700)
    - O CSS acima no <style>
 2. Background global FIXO (z-0, pointer-events-none):
-   - div com bg-gradient-to-b from-[#0a1428] to-[#020810] (navy escuro → quase preto)
+   - div com bg-gradient-to-b from-[#0a1128] to-black
    - div w-[1px] h-[1px] bg-transparent stars-1 animate-[animStar_50s_linear_infinite]
    - div w-[2px] h-[2px] bg-transparent stars-2 animate-[animStar_80s_linear_infinite]
    - div w-[3px] h-[3px] bg-transparent stars-3 animate-[animStar_120s_linear_infinite]
-   - div central blue glow blur-[120px] bg-[#3060a0]/5 w-[800px] h-[800px] rounded-full
-   - div top-[20%] left-[10%] bg-[#204080]/3 blur-[100px] w-[400px] h-[400px] rounded-full
-   - grid overlay: bg-[linear-gradient(rgba(176,192,208,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(176,192,208,0.03)_1px,transparent_1px)] bg-[size:40px_40px]
+   - div central blue glow blur-[120px] bg-blue-600/5 w-[800px] h-[800px]
+   - grid overlay: bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)...] bg-[size:40px_40px]
 3. Top blur header: <div class="gradient-blur"></div>
-4. Navbar fixo: max-w-5xl, bg-[#020810]/70 backdrop-blur-xl border border-[#3060a0]/20 rounded-full, links de seção em text-[#b0c0d0] hover:text-white + botão "Agendar" com hover spin azul (conic-gradient #6090c0)
-5. Hero section fullscreen (min-h-screen, selection-blue): animated badge com ping dot azul (#6090c0) + "Proposta Exclusiva", título Manrope font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-[#b0c0d0]/60, nome do lead em destaque em #90c0e0 com underline curvo SVG azul, subtítulo text-[#b0c0d0], linha "Para: [nome] | De: Agência Avestra | [data]" em text-[#b0c0d0]/60, botão shiny-cta "Ver Proposta" com iconify arrow-right
-6. Seção Diagnóstico: section-divider, label "01 — DIAGNÓSTICO" em text-[#90c0e0] uppercase tracking-widest text-xs, título Manrope bold text-white, grid de metric-cards (classe metric-card) com glow-number text-[#90c0e0] + label text-[#b0c0d0], parágrafo empático text-[#b0c0d0], 3 problem cards com bg-[#204080]/20 border border-[#5070b0]/25 rounded-2xl
-7. Seção "Por Que É Diferente": compare table (bad/good) com header text-[#90c0e0]
-8. Seção "A Solução / Pilares": section-divider, pilares-grid bento (lg:grid-cols-3, primeiro card lg:col-span-2 lg:row-span-2), cada pilar-card com bg-[#0d1e38]/80 border border-[#3060a0]/30 rounded-3xl p-6: número glow-number text-[#90c0e0], iconify icon text-[#6090c0], título Manrope bold text-white, bullets text-[#b0c0d0], resultado esperado em badge bg-[#204080]/40 text-[#90c0e0]
-9. Seção "Jornada": timeline-line com dot circular bg-[#3060a0] border-2 border-[#6090c0], steps numerados text-white, connector gradient azul
-10. Seção "Cronograma": grid 2x2 de phase-cards com top bar gradient linear-gradient(90deg, #204080, #6090c0), bg-[#0d1e38]/60 border border-[#3060a0]/30, fase text-[#90c0e0] + período text-[#b0c0d0] + milestones
-11. Seção "Investimento": featured card bg-[#0d1e38]/90 border border-[#5070b0]/40 shadow-[0_0_60px_rgba(80,112,176,0.15)] rounded-3xl, preço Manrope font-bold glow-number text-white, price-slash para valor original, variável mensal text-[#b0c0d0], badge bg-[#204080]/50 text-[#90c0e0] "Melhor Custo-Benefício"
-12. Full-width blue banner: bg-[#204080]/25 border-y border-[#5070b0]/20 py-16 px-6, citação impactante ou frase de urgência em Manrope italic text-3xl text-[#e0e0d0]
-13. Seção "Próximos Passos" + CTA: 3 steps com círculos bg-[#3060a0] border border-[#6090c0] text-white numerados, botão shiny-cta grande linkando para ${calendlyUrl} com iconify calendar icon, texto complementar text-[#b0c0d0]
-14. Footer: texto em Manrope text-[#b0c0d0], huge watermark text-stroke "AVESTRA" font-manrope font-black tracking-widest, data, disclaimer confidencial text-[#b0c0d0]/40
+4. Navbar fixo: max-w-5xl, bg-black/60 backdrop-blur-xl border border-white/10 rounded-full, links de seção + botão "Agendar" com animação hover spin azul
+5. Hero section fullscreen (min-h-screen): animated badge com ping dot azul + "Proposta Exclusiva", título Manrope font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40, nome do lead em destaque em azul com underline curvo SVG, subtítulo zinc-400, linha "Para: [nome] | De: Agência Avestra | [data]", botão shiny-cta "Ver Proposta" com iconify arrow-right
+6. Seção Diagnóstico: section-divider, label "01 — DIAGNÓSTICO" em azul uppercase tracking, título Manrope bold, grid de metric-cards azuis com glow-number + label, parágrafo empático com dados reais, 3 problem cards com border-blue/20 bg-blue-950/20
+7. Seção "Por Que É Diferente": compare table (bad/good) com header azul
+8. Seção "A Solução / Pilares": section-divider, pilares-grid bento (lg:grid-cols-3, primeiro card lg:col-span-2 lg:row-span-2), cada pilar-card com: número em glow-number azul, iconify icon, título Manrope bold, bullets de benefícios, resultado esperado em badge verde
+9. Seção "Jornada": timeline-line com dot azul circular, steps numerados, connector line
+10. Seção "Cronograma": grid 2x2 de phase-cards com top bar gradient azul, fase + período + milestones
+11. Seção "Investimento": featured card with border-blue/30 shadow-blue, preço Manrope italic glow-number, price-slash para valor original (se aplicável), variável mensal, badge "Melhor Custo-Benefício"
+12. Full-width blue banner: bg-blue-950/30 border-y border-blue/20, citação impactante ou frase de urgência em Manrope italic grande
+13. Seção "Próximos Passos" + CTA: 3 steps com círculos azuis numerados, botão shiny-cta grande linkando para ${calendlyUrl} com iconify calendar icon
+14. Footer: texto principal em Manrope, huge watermark text-stroke "AVESTRA" ou nome da empresa, data, disclaimer confidencial
 15. <script> no final com IntersectionObserver para scroll reveal (.reveal → .active)
 
 REGRAS CRÍTICAS:
 - Use classes Tailwind para layout/spacing (max-w-5xl mx-auto px-6 py-20, grid, flex, rounded-3xl, etc.)
-- Use as classes CSS customizadas (.pilar-card, .metric-card, .glow-number, .timeline-line, .price-slash, .reveal, .section-divider, .shiny-cta, .stars-1, .stars-2, .stars-3, .gradient-blur, .selection-blue, etc.)
-- Paleta EXCLUSIVAMENTE azul Avestra — NENHUM tom vermelho/rosa
+- Use as classes CSS customizadas (.pilar-card, .metric-card, .glow-number, .timeline-line, .price-slash, .reveal, .section-divider, .shiny-cta, .stars-1, .stars-2, .stars-3, .gradient-blur, etc.)
 - Scroll reveal usa .reveal + .active (NÃO .visible)
 - Use iconify icons: lucide:arrow-right, lucide:check, lucide:x, lucide:calendar, lucide:lock, lucide:shield, lucide:trending-up, lucide:zap, etc.
 - Todo texto em Português (pt-BR)
@@ -782,7 +774,7 @@ REGRAS CRÍTICAS:
     resumo_executivo: "Proposta com boa base mas precisa de refinamento em urgência e provas antes de enviar.",
   });
 
-  const generateMockHTML = () => `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Proposta | ${lead.nome}</title><style>body{background:#0a0a0a;color:#e0e0e0;font-family:Inter,sans-serif;margin:0;text-align:center;padding:80px 20px;}h1{font-family:'Manrope',sans-serif;color:#fff;font-size:3rem;}a{color:#ef233c;}</style></head><body><h1>Proposta para ${lead.nome}</h1><p>HTML gerado com sucesso. Na versão com API key, o design Pulse completo será aplicado.</p><a href="${calendlyUrl}" target="_blank">Agendar Call</a></body></html>`;
+  const generateMockHTML = () => `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Proposta | ${lead.nome}</title><style>body{background:#0a1128;color:#e0e0e0;font-family:Inter,sans-serif;margin:0;text-align:center;padding:80px 20px;}h1{font-family:'Manrope',sans-serif;color:#fff;font-size:3rem;}a{color:#5070b0;}</style></head><body><h1>Proposta para ${lead.nome}</h1><p>HTML gerado com sucesso no design Avestra Blue.</p><a href="${calendlyUrl}" target="_blank">Agendar Call</a></body></html>`;
 
   // ─── RENDER STEPS ───────────────────────────────
   const renderStep0 = () => (
@@ -1032,7 +1024,7 @@ REGRAS CRÍTICAS:
 
         <div style={{ textAlign: "center", marginTop: 32 }}>
           <PulseBtn onClick={generateFinalHTML} disabled={generating} icon="zap">
-            {generating ? "Gerando Design..." : "Gerar Proposta HTML (Design Pulse)"}
+            {generating ? "Gerando Design..." : "Gerar Proposta HTML (Avestra Blue)"}
           </PulseBtn>
         </div>
       </div>
@@ -1040,10 +1032,10 @@ REGRAS CRÍTICAS:
   };
 
   const renderStep4 = () => {
-    if (!finalHTML) return <Spinner text="Montando design Pulse..." />;
+    if (!finalHTML) return <Spinner text="Montando design Avestra Blue..." />;
     return (
       <div>
-        <SectionHead num="05" title="Proposta" accent="Final" subtitle="Preview e download da proposta no design Pulse" />
+        <SectionHead num="05" title="Proposta" accent="Final" subtitle="Preview e download da proposta no design Avestra Blue" />
 
         <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 24 }}>
           <PulseBtn small onClick={() => setShowPreview(!showPreview)} icon="eye">{showPreview ? "Fechar Preview" : "Ver Preview"}</PulseBtn>
@@ -1061,7 +1053,7 @@ REGRAS CRÍTICAS:
 
         {showPreview && (
           <Glass style={{ padding: 0, overflow: "hidden", marginBottom: 24, borderRadius: 16 }}>
-            <div style={{ background: "rgba(239,35,60,0.08)", padding: "10px 16px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ background: "rgba(80,112,176,0.1)", padding: "10px 16px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 8 }}>
               <div style={{ width: 10, height: 10, borderRadius: 5, background: RED }} />
               <div style={{ width: 10, height: 10, borderRadius: 5, background: AMBER }} />
               <div style={{ width: 10, height: 10, borderRadius: 5, background: GREEN }} />
@@ -1084,7 +1076,7 @@ REGRAS CRÍTICAS:
           <div style={{ fontSize: 13, color: "#bbb", lineHeight: 1.8 }}>
             A proposta personalizada para <strong style={{ color: "#fff" }}>{lead.nome}</strong> foi gerada com sucesso. Envie o arquivo HTML para o lead junto com o link do Calendly para agendar a call de apresentação.
           </div>
-          <div style={{ marginTop: 16, padding: "14px 20px", background: "rgba(239,35,60,0.06)", borderRadius: 12, border: `1px solid rgba(239,35,60,0.15)` }}>
+          <div style={{ marginTop: 16, padding: "14px 20px", background: "rgba(80,112,176,0.1)", borderRadius: 12, border: `1px solid rgba(80,112,176,0.2)` }}>
             <div style={{ fontSize: 11, color: ACCENT, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Fluxo de Envio Sugerido</div>
             <div style={{ fontSize: 13, color: "#ccc", lineHeight: 1.8 }}>
               1. Hospede o HTML em um link público (Vercel, Netlify, ou como página no seu domínio)<br/>
@@ -1110,14 +1102,14 @@ REGRAS CRÍTICAS:
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: ${BG}; }
         ::-webkit-scrollbar-thumb { background: ${ACCENT}; border-radius: 3px; }
-        ::selection { background: rgba(239,35,60,0.35); color: #fff; }
+        ::selection { background: rgba(80,112,176,0.4); color: #fff; }
       `}</style>
 
       <div style={{ position: "relative", zIndex: 10, maxWidth: 1100, margin: "0 auto", padding: "24px 20px" }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(239,35,60,0.1)", border: `1px solid rgba(239,35,60,0.25)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(80,112,176,0.15)", border: `1px solid rgba(80,112,176,0.3)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon d={icons.zap} color={ACCENT} size={20} />
             </div>
             <div>
@@ -1127,14 +1119,14 @@ REGRAS CRÍTICAS:
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {lead.nome && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 20, background: "rgba(239,35,60,0.08)", border: `1px solid rgba(239,35,60,0.15)` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 20, background: "rgba(80,112,176,0.12)", border: `1px solid rgba(80,112,176,0.25)` }}>
                 <div style={{ width: 6, height: 6, borderRadius: 3, background: GREEN, animation: "pulse 2s infinite" }} />
                 <span style={{ fontSize: 11, color: ACCENT_LIGHT, fontWeight: 500 }}>{lead.nome}</span>
               </div>
             )}
             <button
               onClick={() => setShowSettings(s => !s)}
-              style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 20, background: showSettings ? "rgba(239,35,60,0.15)" : "rgba(255,255,255,0.04)", border: `1px solid ${apiKey ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`, cursor: "pointer", color: apiKey ? GREEN : "#ef4444", fontSize: 11, fontWeight: 600 }}>
+              style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 20, background: showSettings ? "rgba(80,112,176,0.2)" : "rgba(255,255,255,0.04)", border: `1px solid ${apiKey ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`, cursor: "pointer", color: apiKey ? GREEN : "#ef4444", fontSize: 11, fontWeight: 600 }}>
               <Icon d={icons.sparkle} color={apiKey ? GREEN : "#ef4444"} size={14} />
               {apiKey ? "API ✓" : "API ⚠"}
             </button>
@@ -1143,7 +1135,7 @@ REGRAS CRÍTICAS:
 
         {/* Settings panel */}
         {showSettings && (
-          <Glass style={{ padding: 20, marginBottom: 20, border: `1px solid rgba(239,35,60,0.2)` }}>
+          <Glass style={{ padding: 20, marginBottom: 20, border: `1px solid rgba(80,112,176,0.25)` }}>
             <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.15em", color: ACCENT, fontWeight: 600, marginBottom: 12 }}>Configurações — Claude API</div>
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <input
