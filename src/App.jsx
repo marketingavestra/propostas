@@ -639,9 +639,25 @@ JSON exato:
   }, [lead, research, propostaEditada, callClaude]);
 
   // ─── GENERATE FINAL HTML ────────────────────────
+  const HTML_STEPS = [
+    "Estruturando layout e seções da proposta...",
+    "Gerando Hero, Diagnóstico e Diferenciais...",
+    "Montando Solução, Jornada e Cronograma...",
+    "Finalizando Investimento, CTA e animações...",
+    "Aplicando design Avestra Blue e revisando...",
+  ];
+
   const generateFinalHTML = useCallback(async () => {
     setGenerating(true);
     setGenStatus("Montando proposta no design Avestra Blue...");
+    setGenSteps(HTML_STEPS);
+    setGenStepIdx(0);
+    const timers = [
+      setTimeout(() => setGenStepIdx(1), 8000),
+      setTimeout(() => setGenStepIdx(2), 18000),
+      setTimeout(() => setGenStepIdx(3), 30000),
+      setTimeout(() => setGenStepIdx(4), 42000),
+    ];
 
     const avestralCSS = `*, *::before, *::after { box-sizing: border-box; }
         :root { --accent-blue: #5070b0; --accent-blue-glow: rgba(80, 112, 176, 0.5); }
@@ -741,14 +757,18 @@ REGRAS CRÍTICAS:
     setApiError(null);
     try {
       const text = await callClaude(htmlPrompt, 16000);
+      timers.forEach(clearTimeout);
       const htmlClean = text.replace(/```html|```/g, "").trim();
       setFinalHTML(htmlClean);
       setStep(4);
       // Auto-publish to domain
       deployProposal(htmlClean);
     } catch (err) {
+      timers.forEach(clearTimeout);
       setApiError(err.message);
     }
+    setGenSteps([]);
+    setGenStepIdx(-1);
     setGenerating(false);
   }, [propostaEditada, lead, calendlyUrl, callClaude, deployProposal]);
 
