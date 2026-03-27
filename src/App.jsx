@@ -640,11 +640,11 @@ JSON exato:
 
   // ─── GENERATE FINAL HTML ────────────────────────
   const HTML_STEPS = [
-    "Estruturando layout e seções da proposta...",
-    "Gerando Hero, Diagnóstico e Diferenciais...",
-    "Montando Solução, Jornada e Cronograma...",
-    "Finalizando Investimento, CTA e animações...",
-    "Aplicando design Avestra Blue e revisando...",
+    "Gerando Hero, Diagnóstico e Diferenciais... (parte 1/2)",
+    "Construindo seção A Solução... (parte 1/2)",
+    "Gerando Jornada, Cronograma e Investimento... (parte 2/2)",
+    "Finalizando Próximos Passos, CTA e Footer... (parte 2/2)",
+    "Unindo e publicando proposta completa...",
   ];
 
   const generateFinalHTML = useCallback(async () => {
@@ -652,12 +652,6 @@ JSON exato:
     setGenStatus("Montando proposta no design Avestra Blue...");
     setGenSteps(HTML_STEPS);
     setGenStepIdx(0);
-    const timers = [
-      setTimeout(() => setGenStepIdx(1), 8000),
-      setTimeout(() => setGenStepIdx(2), 18000),
-      setTimeout(() => setGenStepIdx(3), 30000),
-      setTimeout(() => setGenStepIdx(4), 42000),
-    ];
 
     const avestralCSS = `*, *::before, *::after { box-sizing: border-box; }
         :root { --accent-blue: #5070b0; --accent-blue-glow: rgba(80, 112, 176, 0.5); }
@@ -701,9 +695,7 @@ JSON exato:
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #000; } ::-webkit-scrollbar-thumb { background: #5070b0; border-radius: 3px; }
         @media (max-width: 768px) { .pilares-grid { grid-template-columns: 1fr !important; } }`;
 
-    const htmlPrompt = `Você é um desenvolvedor front-end especializado em landing pages premium. Gere uma página HTML completa no design AVESTRA BLUE (dark navy/blue palette, estilo moderno com estrelas animadas) para a proposta abaixo.
-
-CONTEÚDO DA PROPOSTA (markdown):
+    const leadCtx = `CONTEÚDO DA PROPOSTA (markdown):
 ${propostaEditada}
 
 DADOS DO LEAD:
@@ -711,60 +703,71 @@ DADOS DO LEAD:
 - Nicho: ${lead.nicho}
 - Cidade: ${lead.cidade}
 - Escritório/Empresa: ${lead.razaoSocial || lead.nome}
+- Calendly: ${calendlyUrl}`;
 
-CALENDLY URL: ${calendlyUrl}
+    // ── PARTE 1: DOCTYPE → A Solução ──────────────────
+    const part1Prompt = `Você é um dev front-end especialista em landing pages premium. Gere a PRIMEIRA METADE de uma página HTML no design AVESTRA BLUE.
 
-CSS OBRIGATÓRIO (use exatamente este CSS no <style>, não omita nada):
+${leadCtx}
+
+CSS OBRIGATÓRIO no <style>:
 ${avestralCSS}
 
-ESTRUTURA HTML OBRIGATÓRIA:
-1. <head> com:
-   - Tailwind CDN (https://cdn.tailwindcss.com)
-   - Iconify: <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-   - Google Fonts: Manrope (200;400;600;700;800) + Inter (300;400;500;600;700)
-   - O CSS acima no <style>
-2. Background global FIXO (z-0, pointer-events-none):
-   - div com bg-gradient-to-b from-[#0a1128] to-black
-   - div w-[1px] h-[1px] bg-transparent stars-1 animate-[animStar_50s_linear_infinite]
-   - div w-[2px] h-[2px] bg-transparent stars-2 animate-[animStar_80s_linear_infinite]
-   - div w-[3px] h-[3px] bg-transparent stars-3 animate-[animStar_120s_linear_infinite]
-   - div central blue glow blur-[120px] bg-blue-600/5 w-[800px] h-[800px]
-   - grid overlay: bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)...] bg-[size:40px_40px]
-3. Top blur header: <div class="gradient-blur"></div>
-4. Navbar fixo: max-w-5xl, bg-black/60 backdrop-blur-xl border border-white/10 rounded-full, links de seção + botão "Agendar" com animação hover spin azul
-5. Hero section fullscreen (min-h-screen): animated badge com ping dot azul + "Proposta Exclusiva", título Manrope font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40, nome do lead em destaque em azul com underline curvo SVG, subtítulo zinc-400, linha "Para: [nome] | De: Agência Avestra | [data]", botão shiny-cta "Ver Proposta" com iconify arrow-right
-6. Seção Diagnóstico: section-divider, label "01 — DIAGNÓSTICO" em azul uppercase tracking, título Manrope bold, grid de metric-cards azuis com glow-number + label, parágrafo empático com dados reais, 3 problem cards com border-blue/20 bg-blue-950/20
-7. Seção "Por Que É Diferente": compare table (bad/good) com header azul
-8. Seção "A Solução / Pilares": section-divider, pilares-grid bento (lg:grid-cols-3, primeiro card lg:col-span-2 lg:row-span-2), cada pilar-card com: número em glow-number azul, iconify icon, título Manrope bold, bullets de benefícios, resultado esperado em badge verde
-9. Seção "Jornada": timeline-line com dot azul circular, steps numerados, connector line
-10. Seção "Cronograma": grid 2x2 de phase-cards com top bar gradient azul, fase + período + milestones
-11. Seção "Investimento": featured card with border-blue/30 shadow-blue, preço Manrope italic glow-number, price-slash para valor original (se aplicável), variável mensal, badge "Melhor Custo-Benefício"
-12. Full-width blue banner: bg-blue-950/30 border-y border-blue/20, citação impactante ou frase de urgência em Manrope italic grande
-13. Seção "Próximos Passos" + CTA: 3 steps com círculos azuis numerados, botão shiny-cta grande linkando para ${calendlyUrl} com iconify calendar icon
-14. Footer: texto principal em Manrope, huge watermark text-stroke "AVESTRA" ou nome da empresa, data, disclaimer confidencial
-15. <script> no final com IntersectionObserver para scroll reveal (.reveal → .active)
+GERE EXATAMENTE (nesta ordem, sem fechar </body> ou </html>):
+1. <!DOCTYPE html> + <html> + <head> completo (Tailwind CDN, Iconify CDN, Google Fonts Manrope+Inter, <style> com o CSS acima)
+2. <body class="bg-[#0a1128] selection-blue"> + background fixo (stars-1, stars-2, stars-3, glow, grid overlay)
+3. <div class="gradient-blur">
+4. Navbar fixo: max-w-5xl, bg-black/60 backdrop-blur-xl rounded-full, links (Diagnóstico, Solução, Investimento, Contato) + botão "Agendar" shiny
+5. Hero fullscreen: badge "Proposta Exclusiva" com ping azul, título grande Manrope com nome do lead em azul e underline SVG curvo, subtítulo zinc-400, linha "Para: ${lead.nome} | De: Agência Avestra", botão shiny-cta "Ver Proposta"
+6. Seção Diagnóstico (id="diagnostico"): label "01 — DIAGNÓSTICO", metric-cards com glow-number, parágrafo empático com dados reais, 3 problem-cards
+7. Seção "Por Que É Diferente" (id="diferente"): compare-table bad/good
+8. Seção "A Solução" (id="solucao"): pilares-grid bento lg:grid-cols-3, pilar-cards com número glow, ícone iconify, bullets, badge verde resultado
 
-REGRAS CRÍTICAS:
-- Use classes Tailwind para layout/spacing (max-w-5xl mx-auto px-6 py-20, grid, flex, rounded-3xl, etc.)
-- Use as classes CSS customizadas (.pilar-card, .metric-card, .glow-number, .timeline-line, .price-slash, .reveal, .section-divider, .shiny-cta, .stars-1, .stars-2, .stars-3, .gradient-blur, etc.)
-- Scroll reveal usa .reveal + .active (NÃO .visible)
-- Use iconify icons: lucide:arrow-right, lucide:check, lucide:x, lucide:calendar, lucide:lock, lucide:shield, lucide:trending-up, lucide:zap, etc.
-- Todo texto em Português (pt-BR)
-- Use os dados reais da proposta — não invente informações
-- O HTML final deve ter 800+ linhas
-- NÃO use markdown no output — apenas HTML puro começando com <!DOCTYPE html>`;
+TERMINE seu output após fechar o </section> da seção "A Solução". NÃO feche </body> nem </html>. NÃO adicione script.
+Apenas HTML puro, sem markdown.`;
+
+    // ── PARTE 2: Jornada → </html> ────────────────────
+    const part2Prompt = `Você é um dev front-end especialista em landing pages premium. Gere a SEGUNDA METADE de uma página HTML no design AVESTRA BLUE.
+
+${leadCtx}
+
+IMPORTANTE: Esta é a continuação de um documento HTML. NÃO inclua <!DOCTYPE>, <html>, <head>, <body>, CSS, ou scripts de CDN. Comece direto com as seções abaixo.
+
+GERE EXATAMENTE (nesta ordem):
+1. Seção "Jornada" (id="jornada"): timeline-line, dots azuis, steps numerados com connector
+2. Seção "Cronograma" (id="cronograma"): grid 2x2 de phase-cards com top bar gradient azul, fase + período + milestones
+3. Banner full-width: bg-blue-950/30 border-y border-blue-500/20, citação impactante em Manrope italic grande
+4. Seção "Investimento" (id="investimento"): featured card border-blue/30, preço glow-number Manrope italic, price-slash se tiver valor original, badge "Melhor Custo-Benefício"
+5. Seção "Próximos Passos + CTA" (id="cta"): 3 steps com círculos azuis numerados, botão shiny-cta grande linkando para ${calendlyUrl} com iconify:lucide:calendar
+6. Footer: nome Manrope, watermark text-stroke "AVESTRA", data, disclaimer confidencial
+7. Feche </div> do wrapper principal (se houver), depois </body>
+8. Script IntersectionObserver: document.querySelectorAll('.reveal').forEach(el => observer.observe(el)) com threshold 0.15, adiciona classe .active
+9. Feche </html>
+
+Apenas HTML puro, sem markdown, sem DOCTYPE.`;
 
     setApiError(null);
     try {
-      const text = await callClaude(htmlPrompt, 16000);
-      timers.forEach(clearTimeout);
-      const htmlClean = text.replace(/```html|```/g, "").trim();
+      // Pass 1
+      const t1 = setTimeout(() => setGenStepIdx(1), 12000);
+      const part1Text = await callClaude(part1Prompt, 8000);
+      clearTimeout(t1);
+      setGenStepIdx(2);
+
+      // Pass 2
+      const t2 = setTimeout(() => setGenStepIdx(3), 12000);
+      const part2Text = await callClaude(part2Prompt, 8000);
+      clearTimeout(t2);
+      setGenStepIdx(4);
+
+      const p1 = part1Text.replace(/```html|```/g, "").trim();
+      const p2 = part2Text.replace(/```html|```/g, "").trim();
+      const htmlClean = p1 + "\n" + p2;
+
       setFinalHTML(htmlClean);
       setStep(4);
-      // Auto-publish to domain
       deployProposal(htmlClean);
     } catch (err) {
-      timers.forEach(clearTimeout);
       setApiError(err.message);
     }
     setGenSteps([]);
