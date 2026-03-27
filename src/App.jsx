@@ -506,58 +506,22 @@ PRINCÍPIOS:
     setGenerating(true);
     setGenStatus("Rodando análise com 4 especialistas...");
 
-    const analysisPrompt = `Você vai assumir 4 papéis de analista para revisar esta proposta. Responda APENAS com JSON válido.
+    const propostaTruncada = propostaEditada.slice(0, 3500);
 
-BRIEFING: Lead ${lead.nome}, ${lead.nicho}, ${lead.cidade}. Score presença digital: ${research?.score_presenca_digital}/100.
+    const analysisPrompt = `Analise esta proposta como 4 especialistas. Responda APENAS JSON válido, sem markdown.
+
+Lead: ${lead.nome} | ${lead.nicho} | ${lead.cidade} | Score digital: ${research?.score_presenca_digital}/100
 
 PROPOSTA:
-${propostaEditada}
+${propostaTruncada}
 
-Para CADA analista, forneça nota (1-10), pontos fortes, pontos fracos, e recomendações. Responda em pt-BR.
-
-JSON exato (sem markdown):
-{
-  "closer": {
-    "nota": 0-10,
-    "veredito": "frase curta",
-    "fortes": ["ponto 1", "ponto 2"],
-    "fracos": ["ponto 1", "ponto 2"],
-    "recomendacoes": ["rec 1", "rec 2"]
-  },
-  "copywriter": {
-    "nota": 0-10,
-    "veredito": "frase curta",
-    "fortes": ["ponto 1", "ponto 2"],
-    "fracos": ["ponto 1", "ponto 2"],
-    "recomendacoes": ["rec 1", "rec 2"]
-  },
-  "devils_advocate": {
-    "nota": 0-10,
-    "veredito": "frase curta",
-    "vulnerabilidades": [{"problema": "desc", "severidade": "CRÍTICO|IMPORTANTE|MENOR", "fix": "sugestão"}],
-    "risco_geral": "frase"
-  },
-  "proposal_analyst": {
-    "nota": 0-10,
-    "veredito": "frase curta",
-    "arco_narrativo": "avaliação",
-    "secoes_reordenar": ["sugestão"],
-    "top_3_mudancas": ["mudança 1", "mudança 2", "mudança 3"]
-  },
-  "nota_geral": 0-10,
-  "pronta_para_enviar": true/false,
-  "resumo_executivo": "frase resumo"
-}`;
+JSON (pt-BR):
+{"closer":{"nota":0,"veredito":"","fortes":[""],"fracos":[""],"recomendacoes":[""]},"copywriter":{"nota":0,"veredito":"","fortes":[""],"fracos":[""],"recomendacoes":[""]},"devils_advocate":{"nota":0,"veredito":"","vulnerabilidades":[{"problema":"","severidade":"CRÍTICO|IMPORTANTE|MENOR","fix":""}],"risco_geral":""},"proposal_analyst":{"nota":0,"veredito":"","arco_narrativo":"","secoes_reordenar":[""],"top_3_mudancas":[""]},"nota_geral":0,"pronta_para_enviar":true,"resumo_executivo":""}`;
 
     setApiError(null);
-    if (!apiKey) {
-      setAnalysis(generateMockAnalysis());
-      setStep(3);
-      setGenerating(false);
-      return;
-    }
+
     try {
-      const text = await callClaude(analysisPrompt, 3000);
+      const text = await callClaude(analysisPrompt, 1800);
       const clean = text.replace(/```json|```/g, "").trim();
       setAnalysis(JSON.parse(clean));
       setStep(3);
