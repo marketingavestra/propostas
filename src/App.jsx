@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 
 // ─── CONSTANTS ────────────────────────────────────────
 const ACCENT = "#5070b0";
@@ -171,7 +171,7 @@ const Input = ({ label, value, onChange, placeholder, type = "text", icon, multi
 };
 
 // ─── SELECT ───────────────────────────────────────────
-const Select = ({ label, value, onChange, options, icon }) => {
+const Select = ({ label, value, onChange, options }) => {
   const [focused, setFocused] = useState(false);
   return (
     <div style={{ marginBottom: 16 }}>
@@ -217,23 +217,6 @@ const Toggle = ({ label, value, onChange }) => (
     </div>
   </div>
 );
-
-// ─── PROGRESS RING ────────────────────────────────────
-const Ring = ({ value, max = 100, size = 80, color = ACCENT, label }) => {
-  const r = (size - 8) / 2;
-  const c = 2 * Math.PI * r;
-  const pct = Math.min(value / max, 1);
-  return (
-    <div style={{ textAlign: "center" }}>
-      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth="4" strokeDasharray={c} strokeDashoffset={c * (1 - pct)} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s ease" }} />
-      </svg>
-      <div style={{ marginTop: -size/2 - 10, fontSize: 18, fontWeight: 700, color, fontFamily: "'Manrope', sans-serif" }}>{value}</div>
-      {label && <div style={{ fontSize: 10, color: "#888", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: size/2 - 6 }}>{label}</div>}
-    </div>
-  );
-};
 
 // ─── STAT CARD ────────────────────────────────────────
 const Stat = ({ number, label, color = "#fff", sub }) => (
@@ -338,21 +321,6 @@ const Spinner = ({ text = "Processando..." }) => (
   </div>
 );
 
-// ─── TYPEWRITER ───────────────────────────────────────
-const TypeWriter = ({ text, speed = 15 }) => {
-  const [display, setDisplay] = useState("");
-  const idx = useRef(0);
-  useEffect(() => {
-    setDisplay(""); idx.current = 0;
-    const iv = setInterval(() => {
-      if (idx.current < text.length) { setDisplay(t => t + text[idx.current]); idx.current++; }
-      else clearInterval(iv);
-    }, speed);
-    return () => clearInterval(iv);
-  }, [text, speed]);
-  return <span>{display}<span style={{ opacity: 0.4, animation: "blink 1s infinite" }}>|</span></span>;
-};
-
 // ═══════════════════════════════════════════════════════
 //  MAIN APP
 // ═══════════════════════════════════════════════════════
@@ -373,32 +341,19 @@ export default function PropLabIntelligence() {
   const [analysis, setAnalysis] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [genStatus, setGenStatus] = useState("");
-  const [selectedDesign, setSelectedDesign] = useState("pulse");
   const [finalHTML, setFinalHTML] = useState(null);
   const [calendlyUrl, setCalendlyUrl] = useState("https://calendly.com/marketingavestra/30min");
   const [propostaEditada, setPropostaEditada] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [apiError, setApiError] = useState(null);
-  const [showSettings, setShowSettings] = useState(false);
-  const [apiKey, setApiKeyState] = useState(() => {
-    return localStorage.getItem("proplab_api_key") || import.meta.env.VITE_ANTHROPIC_API_KEY || "";
-  });
   const iframeRef = useRef(null);
-
-  const setApiKey = (key) => {
-    setApiKeyState(key);
-    localStorage.setItem("proplab_api_key", key);
-  };
 
   // ─── CLAUDE API HELPER ───────────────────────────
   const callClaude = useCallback(async (prompt, maxTokens = 2000) => {
-    const response = await fetch("/api/claude/v1/messages", {
+    const response = await fetch("/api/claude", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
@@ -412,7 +367,7 @@ export default function PropLabIntelligence() {
     }
     const data = await response.json();
     return data.content?.map(i => i.text || "").join("") || "";
-  }, [apiKey]);
+  }, []);
 
   // ─── GENERATE RESEARCH ───────────────────────────
   const generateResearch = useCallback(async () => {
@@ -486,12 +441,6 @@ Responda APENAS com JSON válido, sem markdown, sem backticks. Use esta estrutur
 }`;
 
     setApiError(null);
-    if (!apiKey) {
-      setResearch(generateMockResearch());
-      setStep(1);
-      setGenerating(false);
-      return;
-    }
     try {
       const text = await callClaude(researchPrompt, 2000);
       const clean = text.replace(/```json|```/g, "").trim();
@@ -502,7 +451,7 @@ Responda APENAS com JSON válido, sem markdown, sem backticks. Use esta estrutur
       setApiError(err.message);
     }
     setGenerating(false);
-  }, [lead, apiKey, callClaude]);
+  }, [lead, callClaude]);
 
   // ─── GENERATE PROPOSAL ──────────────────────────
   const generateProposal = useCallback(async () => {
@@ -541,14 +490,6 @@ PRINCÍPIOS:
 - A proposta deve ser irrecusável mostrando que o custo de NÃO agir é maior que o investimento`;
 
     setApiError(null);
-    if (!apiKey) {
-      const fallback = generateMockProposal();
-      setProposal(fallback);
-      setPropostaEditada(fallback);
-      setStep(2);
-      setGenerating(false);
-      return;
-    }
     try {
       const text = await callClaude(proposalPrompt, 4000);
       setProposal(text);
@@ -558,7 +499,7 @@ PRINCÍPIOS:
       setApiError(err.message);
     }
     setGenerating(false);
-  }, [lead, research, apiKey, callClaude]);
+  }, [lead, research, callClaude]);
 
   // ─── ANALYZE PROPOSAL ──────────────────────────
   const analyzeProposal = useCallback(async () => {
@@ -624,14 +565,14 @@ JSON exato (sem markdown):
       setApiError(err.message);
     }
     setGenerating(false);
-  }, [lead, research, propostaEditada, apiKey, callClaude]);
+  }, [lead, research, propostaEditada, callClaude]);
 
   // ─── GENERATE FINAL HTML ────────────────────────
   const generateFinalHTML = useCallback(async () => {
     setGenerating(true);
     setGenStatus("Montando proposta no design Avestra Blue...");
 
-    const blueAvestraCSS = `*, *::before, *::after { box-sizing: border-box; }
+    const avestralCSS = `*, *::before, *::after { box-sizing: border-box; }
         :root { --accent-blue: #5070b0; --accent-blue-glow: rgba(80, 112, 176, 0.5); }
         * { scroll-behavior: smooth; }
         @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -687,7 +628,7 @@ DADOS DO LEAD:
 CALENDLY URL: ${calendlyUrl}
 
 CSS OBRIGATÓRIO (use exatamente este CSS no <style>, não omita nada):
-${pulseCSS}
+${avestralCSS}
 
 ESTRUTURA HTML OBRIGATÓRIA:
 1. <head> com:
@@ -727,12 +668,6 @@ REGRAS CRÍTICAS:
 - NÃO use markdown no output — apenas HTML puro começando com <!DOCTYPE html>`;
 
     setApiError(null);
-    if (!apiKey) {
-      setFinalHTML(generateMockHTML());
-      setStep(4);
-      setGenerating(false);
-      return;
-    }
     try {
       const text = await callClaude(htmlPrompt, 8000);
       const htmlClean = text.replace(/```html|```/g, "").trim();
@@ -742,39 +677,7 @@ REGRAS CRÍTICAS:
       setApiError(err.message);
     }
     setGenerating(false);
-  }, [propostaEditada, lead, calendlyUrl, apiKey, callClaude]);
-
-  // ─── MOCK DATA GENERATORS (fallback) ─────────────
-  const generateMockResearch = () => ({
-    resumo_executivo: `${lead.nome} tem presença digital muito fraca para o potencial do nicho ${lead.nicho}. Oportunidade clara de conversão.`,
-    score_presenca_digital: 23,
-    areas: {
-      google_meu_negocio: { status: lead.temGMB ? "ok" : "problema", findings: lead.temGMB ? ["GMB ativo", "Poucas avaliações", "Informações incompletas"] : ["Sem cadastro no Google Meu Negócio", "Invisível para buscas locais", `Concorrentes em ${lead.cidade} já dominam as buscas`], score_impact: lead.temGMB ? -5 : 20, oportunidade: "Cadastro e otimização do GMB pode gerar 40% mais contatos orgânicos" },
-      site_e_landing: { status: lead.temSite ? "atencao" : "problema", findings: lead.temSite ? ["Site existe mas sem otimização", "Sem formulário de captação eficiente", "Carregamento lento no mobile"] : ["Sem site profissional", "Perde credibilidade para leads que pesquisam", "Sem landing page para campanhas"], score_impact: lead.temSite ? 10 : 25, oportunidade: "Um site otimizado com funil de captação pode dobrar os agendamentos" },
-      pixel_tracking: { status: lead.temPixel ? "atencao" : "problema", findings: lead.temPixel ? ["Pixel instalado mas sem eventos configurados", "Sem rastreamento de conversões"] : ["Sem Pixel do Facebook instalado", "Sem Google Analytics/Tag Manager", "Zero dados de comportamento do visitante"], score_impact: lead.temPixel ? 10 : 20, oportunidade: "Instalar tracking completo permite campanhas inteligentes e remarketing" },
-      instagram_bio: { status: lead.temLinkBio ? "atencao" : "problema", findings: lead.ctaSemLink ? ["Tem CTA na bio mas sem link funcional", "Visitante não sabe onde clicar", `${lead.seguidores} seguidores sem funil de conversão`] : lead.temLinkBio ? ["Link na bio presente", "Poderia ser mais estratégico", "Sem página de captação dedicada"] : ["Sem link na bio", "Tráfego orgânico desperdiçado", "Seguidores não têm como virar clientes"], score_impact: lead.ctaSemLink ? 25 : lead.temLinkBio ? 5 : 20, oportunidade: "Link na bio com página estratégica converte seguidores em agendamentos" },
-      anuncios_marketing: { status: "problema", findings: ["Sem estratégia de anúncios pagos detectada", `Nicho ${lead.nicho} tem demanda alta no digital`, "Concorrentes já investem em Meta Ads e Google Ads"], score_impact: 15, oportunidade: "Campanhas segmentadas no nicho podem gerar ROI de 3-5x" },
-    },
-    diagnostico_geral: `${lead.nome} atua no nicho de ${lead.nicho} há ${lead.oabAnos} anos e tem ${lead.seguidores} seguidores no Instagram, mas a presença digital está muito aquém do potencial. Sem site otimizado, sem tracking, e sem funil de conversão — cada seguidor conquistado é um potencial cliente perdido.`,
-    top_3_problemas: ["Sem funil de conversão digital (seguidores não viram clientes)", lead.temSite ? "Site sem otimização e sem tracking" : "Sem site profissional — perde credibilidade", lead.temGMB ? "GMB fraco, sem avaliações suficientes" : "Invisível no Google — sem GMB cadastrado"],
-    proposta_valor: `Transformar a presença digital de ${lead.nome} em uma máquina de agendamentos em 30 dias`,
-    bio_sugerida: `⚖️ ${lead.nicho} | ${lead.cidade}\n📞 Agende sua consulta 👇\n🔗 Link abaixo`,
-    link_bio_sugerido: "Página de captação com formulário + WhatsApp + agendamento online",
-  });
-
-  const generateMockProposal = () => `# Proposta de Presença Digital Estratégica\n## Para: ${lead.nome} — ${lead.nicho}\n\n### O Problema\n\nDr(a). ${lead.nome}, após analisar sua presença digital, identifiquei oportunidades significativas. Com ${lead.seguidores} seguidores e atuação em ${lead.nicho}, o potencial de captação digital é enorme — mas hoje, cada seguidor conquistado é um potencial cliente que não tem como chegar até você.\n\n### A Solução\n\nVou montar um sistema completo de presença digital:\n\n1. **Site Profissional** — Landing page otimizada para conversão\n2. **Google Meu Negócio** — Visibilidade nas buscas locais\n3. **Link na Bio Estratégico** — Funil de captação no Instagram\n4. **Tracking Completo** — Pixel, Analytics, dados de conversão\n5. **Gestão de Anúncios** — Campanhas segmentadas no nicho\n\n### Investimento\n\n[VALOR]\n\n### Próximos Passos\n\n1. Confirmar interesse respondendo esta proposta\n2. Alinhar detalhes em uma call de 30 minutos\n3. Agendar pelo Calendly: ${calendlyUrl}`;
-
-  const generateMockAnalysis = () => ({
-    closer: { nota: 7, veredito: "Proposta sólida mas precisa de mais urgência", fortes: ["Diagnóstico personalizado impressiona", "Dados reais criam credibilidade"], fracos: ["Falta senso de urgência", "Preço precisa de ancoragem"], recomendacoes: ["Adicionar custo da inação", "Mostrar ROI projetado"] },
-    copywriter: { nota: 7, veredito: "Boa estrutura, copy pode ser mais emocional", fortes: ["Tom profissional adequado", "Benefícios claros"], fracos: ["Abertura poderia ser mais impactante", "Faltam gatilhos de perda"], recomendacoes: ["Abrir com dado chocante do diagnóstico", "Adicionar depoimento ou caso similar"] },
-    devils_advocate: { nota: 6, veredito: "Algumas promessas precisam de fundamentação", vulnerabilidades: [{ problema: "Projeções de resultado sem base comprovada", severidade: "IMPORTANTE", fix: "Adicionar cases ou benchmarks do nicho" }, { problema: "Escopo pode ser amplo demais para o preço", severidade: "MENOR", fix: "Definir claramente o que está fora do escopo" }], risco_geral: "Risco moderado — proposta precisa de mais provas" },
-    proposal_analyst: { nota: 7, veredito: "Estrutura correta, posicionamento como parceiro funciona", arco_narrativo: "Dor → Solução → Ação presente, mas 'Ação' precisa ser mais forte", secoes_reordenar: ["Mover resultados esperados para antes do investimento"], top_3_mudancas: ["Expandir seção do problema com mais dados", "Adicionar comparativo antes/depois", "CTA mais direto com Calendly embutido"] },
-    nota_geral: 7,
-    pronta_para_enviar: false,
-    resumo_executivo: "Proposta com boa base mas precisa de refinamento em urgência e provas antes de enviar.",
-  });
-
-  const generateMockHTML = () => `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Proposta | ${lead.nome}</title><style>body{background:#0a1128;color:#e0e0e0;font-family:Inter,sans-serif;margin:0;text-align:center;padding:80px 20px;}h1{font-family:'Manrope',sans-serif;color:#fff;font-size:3rem;}a{color:#5070b0;}</style></head><body><h1>Proposta para ${lead.nome}</h1><p>HTML gerado com sucesso no design Avestra Blue.</p><a href="${calendlyUrl}" target="_blank">Agendar Call</a></body></html>`;
+  }, [propostaEditada, lead, calendlyUrl, callClaude]);
 
   // ─── RENDER STEPS ───────────────────────────────
   const renderStep0 = () => (
@@ -1124,32 +1027,12 @@ REGRAS CRÍTICAS:
                 <span style={{ fontSize: 11, color: ACCENT_LIGHT, fontWeight: 500 }}>{lead.nome}</span>
               </div>
             )}
-            <button
-              onClick={() => setShowSettings(s => !s)}
-              style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 20, background: showSettings ? "rgba(80,112,176,0.2)" : "rgba(255,255,255,0.04)", border: `1px solid ${apiKey ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`, cursor: "pointer", color: apiKey ? GREEN : "#ef4444", fontSize: 11, fontWeight: 600 }}>
-              <Icon d={icons.sparkle} color={apiKey ? GREEN : "#ef4444"} size={14} />
-              {apiKey ? "API ✓" : "API ⚠"}
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 20, background: "rgba(80,112,176,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: GREEN, fontSize: 11, fontWeight: 600 }}>
+              <Icon d={icons.sparkle} color={GREEN} size={14} />
+              API ✓
+            </div>
           </div>
         </div>
-
-        {/* Settings panel */}
-        {showSettings && (
-          <Glass style={{ padding: 20, marginBottom: 20, border: `1px solid rgba(80,112,176,0.25)` }}>
-            <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.15em", color: ACCENT, fontWeight: 600, marginBottom: 12 }}>Configurações — Claude API</div>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <input
-                type="password"
-                placeholder="sk-ant-api03-..."
-                value={apiKey}
-                onChange={e => setApiKey(e.target.value)}
-                style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: `1px solid ${apiKey ? "rgba(34,197,94,0.3)" : BORDER}`, borderRadius: 10, padding: "10px 14px", color: "#e0e0e0", fontSize: 13, outline: "none", fontFamily: "monospace" }}
-              />
-              {apiKey && <span style={{ fontSize: 11, color: GREEN, whiteSpace: "nowrap" }}>✓ Chave configurada</span>}
-            </div>
-            <div style={{ fontSize: 11, color: "#666", marginTop: 8 }}>A chave é salva no seu navegador (localStorage). Sem ela, o app roda em modo demo com dados fictícios.</div>
-          </Glass>
-        )}
 
         {/* API Error banner */}
         {apiError && (
