@@ -365,7 +365,37 @@ export default function PropLabIntelligence() {
   const [apiError, setApiError] = useState(null);
   const [genStepIdx, setGenStepIdx] = useState(-1);
   const [genSteps, setGenSteps] = useState([]);
+  const [deployStatus, setDeployStatus] = useState(null); // null | "loading" | "success" | "error"
+  const [deployedUrl, setDeployedUrl] = useState("");
   const iframeRef = useRef(null);
+
+  // ─── SLUG HELPER ─────────────────────────────────
+  const toSlug = (name) =>
+    name.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+  // ─── DEPLOY TO DOMAIN ────────────────────────────
+  const deployProposal = useCallback(async () => {
+    setDeployStatus("loading");
+    const slug = toSlug(lead.nome);
+    try {
+      const response = await fetch("/api/deploy-proposal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, html: finalHTML }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `Erro ${response.status}`);
+      setDeployedUrl(data.url);
+      setDeployStatus("success");
+    } catch (err) {
+      setDeployStatus(err.message);
+    }
+  }, [lead.nome, finalHTML]);
 
   // ─── CLAUDE API HELPER ───────────────────────────
   const callClaude = useCallback(async (prompt, maxTokens = 2000) => {
@@ -987,7 +1017,35 @@ REGRAS CRÍTICAS:
             URL.revokeObjectURL(url);
           }} icon="download">Baixar HTML</PulseBtn>
           <PulseBtn small onClick={() => navigator.clipboard.writeText(finalHTML)} icon="file">Copiar HTML</PulseBtn>
+          <PulseBtn
+            small
+            onClick={deployProposal}
+            disabled={deployStatus === "loading"}
+            icon="send"
+            style={{ background: deployStatus === "success" ? GREEN : undefined }}
+          >
+            {deployStatus === "loading" ? "Publicando..." : deployStatus === "success" ? "Publicado ✓" : "Publicar em sala.bonadio.site"}
+          </PulseBtn>
         </div>
+
+        {/* Deploy status */}
+        {deployStatus === "success" && (
+          <Glass style={{ padding: "16px 20px", marginBottom: 20, borderLeft: `3px solid ${GREEN}`, display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, color: GREEN, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Proposta publicada</div>
+              <a href={deployedUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, color: ACCENT_LIGHT, fontWeight: 500, textDecoration: "none", wordBreak: "break-all" }}>{deployedUrl}</a>
+              <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>Ativa em ~30s após o deploy automático do Vercel</div>
+            </div>
+            <PulseBtn small onClick={() => navigator.clipboard.writeText(deployedUrl)} icon="link">Copiar link</PulseBtn>
+          </Glass>
+        )}
+
+        {typeof deployStatus === "string" && deployStatus !== "loading" && deployStatus !== "success" && (
+          <Glass style={{ padding: "14px 20px", marginBottom: 20, borderLeft: `3px solid ${RED}` }}>
+            <div style={{ fontSize: 12, color: RED, fontWeight: 600 }}>Erro no deploy</div>
+            <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{deployStatus}</div>
+          </Glass>
+        )}
 
         {showPreview && (
           <Glass style={{ padding: 0, overflow: "hidden", marginBottom: 24, borderRadius: 16 }}>
@@ -1017,10 +1075,10 @@ REGRAS CRÍTICAS:
           <div style={{ marginTop: 16, padding: "14px 20px", background: "rgba(80,112,176,0.1)", borderRadius: 12, border: `1px solid rgba(80,112,176,0.2)` }}>
             <div style={{ fontSize: 11, color: ACCENT, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Fluxo de Envio Sugerido</div>
             <div style={{ fontSize: 13, color: "#ccc", lineHeight: 1.8 }}>
-              1. Hospede o HTML em um link público (Vercel, Netlify, ou como página no seu domínio)<br/>
-              2. Envie pelo WhatsApp: "Oi [Nome], preparei um estudo completo sobre a presença digital do seu escritório. Dá uma olhada: [link]"<br/>
-              3. O lead abre, vê o diagnóstico personalizado, e agenda pelo Calendly no final<br/>
-              4. Na call, você já tem toda a pesquisa pronta — é só apresentar
+              1. Clique em <strong style={{ color: ACCENT_LIGHT }}>Publicar em sala.bonadio.site</strong> — o HTML vai direto para o repo e a Vercel deploya em ~30s<br/>
+              2. Copie o link gerado (ex: sala.bonadio.site/sablina-castro)<br/>
+              3. Envie pelo WhatsApp: "Oi [Nome], preparei um estudo completo sobre a presença digital do seu escritório. Dá uma olhada: [link]"<br/>
+              4. O lead abre, vê o diagnóstico personalizado, e agenda pelo Calendly no final
             </div>
           </div>
         </Glass>
