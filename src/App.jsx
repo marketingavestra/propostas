@@ -640,11 +640,11 @@ JSON exato:
 
   // ─── GENERATE FINAL HTML ────────────────────────
   const HTML_STEPS = [
-    "Gerando Hero, Diagnóstico e Diferenciais... (parte 1/2)",
-    "Construindo seção A Solução... (parte 1/2)",
-    "Gerando Jornada, Cronograma e Investimento... (parte 2/2)",
-    "Finalizando Próximos Passos, CTA e Footer... (parte 2/2)",
-    "Unindo e publicando proposta completa...",
+    { label: "Gerando Hero, Diagnóstico e Diferenciais... (parte 1/2)" },
+    { label: "Construindo seção A Solução... (parte 1/2)" },
+    { label: "Gerando Jornada, Cronograma e Investimento... (parte 2/2)" },
+    { label: "Finalizando Próximos Passos, CTA e Footer... (parte 2/2)" },
+    { label: "Unindo e publicando proposta completa..." },
   ];
 
   const generateFinalHTML = useCallback(async () => {
