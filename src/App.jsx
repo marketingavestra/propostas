@@ -640,11 +640,10 @@ JSON exato:
 
   // ─── GENERATE FINAL HTML ────────────────────────
   const HTML_STEPS = [
-    { label: "Gerando Hero, Diagnóstico e Diferenciais... (parte 1/2)" },
-    { label: "Construindo seção A Solução... (parte 1/2)" },
-    { label: "Gerando Jornada, Cronograma e Investimento... (parte 2/2)" },
-    { label: "Finalizando Próximos Passos, CTA e Footer... (parte 2/2)" },
-    { label: "Unindo e publicando proposta completa..." },
+    { label: "Parte 1/3 — Head, Hero e Diagnóstico..." },
+    { label: "Parte 2/3 — Solução, Jornada e Cronograma..." },
+    { label: "Parte 3/3 — Investimento, CTA e Footer..." },
+    { label: "Unindo as 3 partes e publicando..." },
   ];
 
   const generateFinalHTML = useCallback(async () => {
@@ -705,64 +704,71 @@ DADOS DO LEAD:
 - Escritório/Empresa: ${lead.razaoSocial || lead.nome}
 - Calendly: ${calendlyUrl}`;
 
-    // ── PARTE 1: DOCTYPE → A Solução ──────────────────
-    const part1Prompt = `Você é um dev front-end especialista em landing pages premium. Gere a PRIMEIRA METADE de uma página HTML no design AVESTRA BLUE.
+    const base = `PROPOSTA (markdown):\n${propostaEditada}\n\nLEAD: ${lead.nome} | ${lead.nicho} | ${lead.cidade} | ${lead.razaoSocial || lead.nome}\nCALENDLY: ${calendlyUrl}`;
 
-${leadCtx}
+    // ── PARTE 1: head + hero + diagnóstico ────────────
+    const part1Prompt = `Dev front-end expert em landing pages premium. Gere a PARTE 1 de 3 de uma página HTML design AVESTRA BLUE.
+
+${base}
 
 CSS OBRIGATÓRIO no <style>:
 ${avestralCSS}
 
-GERE EXATAMENTE (nesta ordem, sem fechar </body> ou </html>):
-1. <!DOCTYPE html> + <html> + <head> completo (Tailwind CDN, Iconify CDN, Google Fonts Manrope+Inter, <style> com o CSS acima)
-2. <body class="bg-[#0a1128] selection-blue"> + background fixo (stars-1, stars-2, stars-3, glow, grid overlay)
-3. <div class="gradient-blur">
-4. Navbar fixo: max-w-5xl, bg-black/60 backdrop-blur-xl rounded-full, links (Diagnóstico, Solução, Investimento, Contato) + botão "Agendar" shiny
-5. Hero fullscreen: badge "Proposta Exclusiva" com ping azul, título grande Manrope com nome do lead em azul e underline SVG curvo, subtítulo zinc-400, linha "Para: ${lead.nome} | De: Agência Avestra", botão shiny-cta "Ver Proposta"
-6. Seção Diagnóstico (id="diagnostico"): label "01 — DIAGNÓSTICO", metric-cards com glow-number, parágrafo empático com dados reais, 3 problem-cards
-7. Seção "Por Que É Diferente" (id="diferente"): compare-table bad/good
-8. Seção "A Solução" (id="solucao"): pilares-grid bento lg:grid-cols-3, pilar-cards com número glow, ícone iconify, bullets, badge verde resultado
+GERE APENAS (sem fechar body/html):
+1. <!DOCTYPE html><html lang="pt-BR"><head> — Tailwind CDN, Iconify CDN, Google Fonts Manrope+Inter, <style> com TODO o CSS acima
+2. <body class="bg-[#0a1128] selection-blue overflow-x-hidden"> + background fixo z-0: stars-1/2/3, glow azul, grid overlay
+3. <div class="gradient-blur"></div>
+4. Navbar fixo rounded-full bg-black/60 backdrop-blur-xl: links âncora + botão "Agendar" shiny-cta pequeno
+5. Hero min-h-screen: badge ping azul "Proposta Exclusiva", título Manrope tracking-tighter text-transparent bg-clip-text from-white to-white/40, nome "${lead.nome}" em azul com underline SVG, subtítulo zinc-400, "Para: ${lead.nome} | De: Agência Avestra", botão shiny-cta "Ver Proposta" lucide:arrow-right
+6. Seção id="diagnostico": label "01 — DIAGNÓSTICO", 3 metric-cards glow-number, parágrafo empático dados reais, 3 problem-cards border-blue/20
 
-TERMINE seu output após fechar o </section> da seção "A Solução". NÃO feche </body> nem </html>. NÃO adicione script.
-Apenas HTML puro, sem markdown.`;
+PARE após fechar </section> do diagnóstico. NÃO escreva mais nada.`;
 
-    // ── PARTE 2: Jornada → </html> ────────────────────
-    const part2Prompt = `Você é um dev front-end especialista em landing pages premium. Gere a SEGUNDA METADE de uma página HTML no design AVESTRA BLUE.
+    // ── PARTE 2: diferenciais + solução + jornada + cronograma ────
+    const part2Prompt = `Dev front-end expert em landing pages premium. Gere a PARTE 2 de 3 de uma página HTML design AVESTRA BLUE.
 
-${leadCtx}
+${base}
 
-IMPORTANTE: Esta é a continuação de um documento HTML. NÃO inclua <!DOCTYPE>, <html>, <head>, <body>, CSS, ou scripts de CDN. Comece direto com as seções abaixo.
+CONTINUAÇÃO DO DOCUMENTO HTML — NÃO inclua DOCTYPE, html, head, body, CSS ou CDN scripts. Comece diretamente com as seções:
 
-GERE EXATAMENTE (nesta ordem):
-1. Seção "Jornada" (id="jornada"): timeline-line, dots azuis, steps numerados com connector
-2. Seção "Cronograma" (id="cronograma"): grid 2x2 de phase-cards com top bar gradient azul, fase + período + milestones
-3. Banner full-width: bg-blue-950/30 border-y border-blue-500/20, citação impactante em Manrope italic grande
-4. Seção "Investimento" (id="investimento"): featured card border-blue/30, preço glow-number Manrope italic, price-slash se tiver valor original, badge "Melhor Custo-Benefício"
-5. Seção "Próximos Passos + CTA" (id="cta"): 3 steps com círculos azuis numerados, botão shiny-cta grande linkando para ${calendlyUrl} com iconify:lucide:calendar
-6. Footer: nome Manrope, watermark text-stroke "AVESTRA", data, disclaimer confidencial
-7. Feche </div> do wrapper principal (se houver), depois </body>
-8. Script IntersectionObserver: document.querySelectorAll('.reveal').forEach(el => observer.observe(el)) com threshold 0.15, adiciona classe .active
-9. Feche </html>
+1. Seção id="diferente": label "02 — POR QUE É DIFERENTE", compare-table bad/good com header azul
+2. Seção id="solucao": label "03 — A SOLUÇÃO", pilares-grid bento lg:grid-cols-3 (1º card lg:col-span-2), cada pilar-card: número glow-number, iconify icon, título, bullets benefícios, badge verde resultado
+3. Seção id="jornada": label "04 — JORNADA", timeline-line com dots azuis circulares, steps numerados, linha conectora
+4. Seção id="cronograma": label "05 — CRONOGRAMA", grid 2x2 phase-cards com top bar gradient azul, fase + período + milestones lista
 
-Apenas HTML puro, sem markdown, sem DOCTYPE.`;
+PARE após fechar </section> do cronograma. NÃO escreva mais nada.`;
+
+    // ── PARTE 3: investimento + CTA calendly + footer + script ────
+    const part3Prompt = `Dev front-end expert em landing pages premium. Gere a PARTE 3 de 3 (FINAL) de uma página HTML design AVESTRA BLUE.
+
+${base}
+
+CONTINUAÇÃO DO DOCUMENTO HTML — NÃO inclua DOCTYPE, html, head, body, CSS ou CDN scripts. Gere e FECHE o documento completo:
+
+1. Banner full-width: bg-blue-950/30 border-y border-blue-500/20, citação impactante Manrope italic grande azul
+2. Seção id="investimento": label "06 — INVESTIMENTO", featured card border-blue/30 shadow-blue, preço glow-number Manrope italic, price-slash se houver, badge "Melhor Custo-Benefício"
+3. Seção id="cta": label "07 — PRÓXIMOS PASSOS", 3 steps círculos azuis numerados, parágrafo motivador
+4. Seção Calendly: título "Agende sua sessão estratégica gratuita", depois cole EXATAMENTE este widget:
+<div class="calendly-inline-widget" data-url="${calendlyUrl}" style="min-width:320px;height:700px;"></div>
+<script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+5. Footer: nome Manrope, watermark text-stroke "AVESTRA", data ${new Date().toLocaleDateString("pt-BR")}, disclaimer confidencial
+6. Feche </main> (ou o wrapper que foi aberto), </body>
+7. Script IntersectionObserver: .reveal → .active com threshold 0.15
+8. </html>
+
+Este é o fim do documento. Feche tudo corretamente.`;
 
     setApiError(null);
     try {
-      // Pass 1
-      const t1 = setTimeout(() => setGenStepIdx(1), 12000);
-      const part1Text = await callClaude(part1Prompt, 8000);
-      clearTimeout(t1);
+      const p1Text = await callClaude(part1Prompt, 6000);
+      setGenStepIdx(1);
+      const p2Text = await callClaude(part2Prompt, 6000);
       setGenStepIdx(2);
+      const p3Text = await callClaude(part3Prompt, 6000);
+      setGenStepIdx(3);
 
-      // Pass 2
-      const t2 = setTimeout(() => setGenStepIdx(3), 12000);
-      const part2Text = await callClaude(part2Prompt, 8000);
-      clearTimeout(t2);
-      setGenStepIdx(4);
-
-      const p1 = part1Text.replace(/```html|```/g, "").trim();
-      const p2 = part2Text.replace(/```html|```/g, "").trim();
-      const htmlClean = p1 + "\n" + p2;
+      const clean = (t) => t.replace(/```html[\s\S]*?```|```/g, "").trim();
+      const htmlClean = clean(p1Text) + "\n" + clean(p2Text) + "\n" + clean(p3Text);
 
       setFinalHTML(htmlClean);
       setStep(4);
@@ -1128,12 +1134,11 @@ Apenas HTML puro, sem markdown, sem DOCTYPE.`;
             A proposta personalizada para <strong style={{ color: "#fff" }}>{lead.nome}</strong> foi gerada com sucesso. Envie o arquivo HTML para o lead junto com o link do Calendly para agendar a call de apresentação.
           </div>
           <div style={{ marginTop: 16, padding: "14px 20px", background: "rgba(80,112,176,0.1)", borderRadius: 12, border: `1px solid rgba(80,112,176,0.2)` }}>
-            <div style={{ fontSize: 11, color: ACCENT, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Fluxo de Envio Sugerido</div>
+            <div style={{ fontSize: 11, color: ACCENT, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Como Enviar</div>
             <div style={{ fontSize: 13, color: "#ccc", lineHeight: 1.8 }}>
-              1. Clique em <strong style={{ color: ACCENT_LIGHT }}>Publicar em sala.bonadio.site</strong> — o HTML vai direto para o repo e a Vercel deploya em ~30s<br/>
-              2. Copie o link gerado (ex: sala.bonadio.site/sablina-castro)<br/>
-              3. Envie pelo WhatsApp: "Oi [Nome], preparei um estudo completo sobre a presença digital do seu escritório. Dá uma olhada: [link]"<br/>
-              4. O lead abre, vê o diagnóstico personalizado, e agenda pelo Calendly no final
+              1. Copie o link gerado acima — o site já está publicado<br/>
+              2. Envie o link para o lead pelo WhatsApp<br/>
+              3. Grave um áudio curto explicando a oferta e envie junto com o link
             </div>
           </div>
         </Glass>
