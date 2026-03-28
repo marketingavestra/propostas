@@ -760,22 +760,27 @@ Este é o fim do documento. Feche tudo corretamente.`;
 
     setApiError(null);
     try {
-      const p1Text = await callClaude(part1Prompt, 6000);
+      const p1Text = await callClaude(part1Prompt, 7000);
       setGenStepIdx(1);
-      const p2Text = await callClaude(part2Prompt, 6000);
+      const p2Text = await callClaude(part2Prompt, 7000);
       setGenStepIdx(2);
-      const p3Text = await callClaude(part3Prompt, 6000);
+      const p3Text = await callClaude(part3Prompt, 8000);
       setGenStepIdx(3);
 
-      const stripMd = (t) => t.replace(/```html[\s\S]*?```|```/g, "").trim();
+      // Fix: remove ```html marker properly (avoids "html" residue at top)
+      const stripMd = (t) => t
+        .replace(/^```html\s*/i, "")
+        .replace(/```html/gi, "")
+        .replace(/```/g, "")
+        .trim();
 
       // Part 1: remove premature closing tags
       const p1 = stripMd(p1Text)
-        .replace(/<\/body>\s*<\/html>/gi, "")
-        .replace(/<\/body>/gi, "")
-        .replace(/<\/html>/gi, "");
+        .replace(/<\/body>\s*<\/html>\s*$/gi, "")
+        .replace(/<\/body>\s*$/gi, "")
+        .replace(/<\/html>\s*$/gi, "");
 
-      // Parts 2+3: strip any DOCTYPE/html/head/body wrappers Claude inserts
+      // Parts 2+3: strip any DOCTYPE/html/head/body wrappers Claude adds
       const stripWrapper = (t) => stripMd(t)
         .replace(/<!DOCTYPE[^>]*>/gi, "")
         .replace(/<html[^>]*>/gi, "")
@@ -786,9 +791,9 @@ Este é o fim do documento. Feche tudo corretamente.`;
         .trim();
 
       const p2 = stripWrapper(p2Text);
-      // Part 3: strip wrapper but ensure document closes properly
+      // Part 3: strip wrapper then guarantee proper document close
       const p3base = stripWrapper(p3Text);
-      const p3 = p3base + "\n</body>\n</html>";
+      const p3 = p3base.trimEnd() + "\n</body>\n</html>";
 
       const htmlClean = p1 + "\n" + p2 + "\n" + p3;
 
