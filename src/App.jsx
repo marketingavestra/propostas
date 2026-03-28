@@ -767,8 +767,30 @@ Este é o fim do documento. Feche tudo corretamente.`;
       const p3Text = await callClaude(part3Prompt, 6000);
       setGenStepIdx(3);
 
-      const clean = (t) => t.replace(/```html[\s\S]*?```|```/g, "").trim();
-      const htmlClean = clean(p1Text) + "\n" + clean(p2Text) + "\n" + clean(p3Text);
+      const stripMd = (t) => t.replace(/```html[\s\S]*?```|```/g, "").trim();
+
+      // Part 1: remove premature closing tags
+      const p1 = stripMd(p1Text)
+        .replace(/<\/body>\s*<\/html>/gi, "")
+        .replace(/<\/body>/gi, "")
+        .replace(/<\/html>/gi, "");
+
+      // Parts 2+3: strip any DOCTYPE/html/head/body wrappers Claude inserts
+      const stripWrapper = (t) => stripMd(t)
+        .replace(/<!DOCTYPE[^>]*>/gi, "")
+        .replace(/<html[^>]*>/gi, "")
+        .replace(/<\/html>/gi, "")
+        .replace(/<head>[\s\S]*?<\/head>/gi, "")
+        .replace(/<body[^>]*>/gi, "")
+        .replace(/<\/body>/gi, "")
+        .trim();
+
+      const p2 = stripWrapper(p2Text);
+      // Part 3: strip wrapper but ensure document closes properly
+      const p3base = stripWrapper(p3Text);
+      const p3 = p3base + "\n</body>\n</html>";
+
+      const htmlClean = p1 + "\n" + p2 + "\n" + p3;
 
       setFinalHTML(htmlClean);
       setStep(4);
