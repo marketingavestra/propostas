@@ -738,25 +738,18 @@ CONTINUAÇÃO DO DOCUMENTO HTML — NÃO inclua DOCTYPE, html, head, body, CSS o
 
 PARE após fechar </section> do cronograma. NÃO escreva mais nada.`;
 
-    // ── PARTE 3: investimento + CTA calendly + footer + script ────
-    const part3Prompt = `Dev front-end expert em landing pages premium. Gere a PARTE 3 de 3 (FINAL) de uma página HTML design AVESTRA BLUE.
+    // ── PARTE 3: investimento + próximos passos (calendly/footer/script são hardcoded) ────
+    const part3Prompt = `Dev front-end expert em landing pages premium. Gere a PARTE 3 de 3 de uma página HTML design AVESTRA BLUE.
 
 ${base}
 
-CONTINUAÇÃO DO DOCUMENTO HTML — NÃO inclua DOCTYPE, html, head, body, CSS ou CDN scripts. Gere e FECHE o documento completo:
+CONTINUAÇÃO DO DOCUMENTO HTML — NÃO inclua DOCTYPE, html, head, body, CSS ou CDN scripts.
 
 1. Banner full-width: bg-blue-950/30 border-y border-blue-500/20, citação impactante Manrope italic grande azul
 2. Seção id="investimento": label "06 — INVESTIMENTO", featured card border-blue/30 shadow-blue, preço glow-number Manrope italic, price-slash se houver, badge "Melhor Custo-Benefício"
 3. Seção id="cta": label "07 — PRÓXIMOS PASSOS", 3 steps círculos azuis numerados, parágrafo motivador
-4. Seção Calendly: título "Agende sua sessão estratégica gratuita", depois cole EXATAMENTE este widget:
-<div class="calendly-inline-widget" data-url="${calendlyUrl}" style="min-width:320px;height:700px;"></div>
-<script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
-5. Footer: nome Manrope, watermark text-stroke "AVESTRA", data ${new Date().toLocaleDateString("pt-BR")}, disclaimer confidencial
-6. Feche </main> (ou o wrapper que foi aberto), </body>
-7. Script IntersectionObserver: .reveal → .active com threshold 0.15
-8. </html>
 
-Este é o fim do documento. Feche tudo corretamente.`;
+PARE após fechar </section> do CTA. NÃO escreva mais nada — não escreva footer, script, </main>, </body>, </html>.`;
 
     setApiError(null);
     try {
@@ -791,9 +784,30 @@ Este é o fim do documento. Feche tudo corretamente.`;
         .trim();
 
       const p2 = stripWrapper(p2Text);
-      // Part 3: strip wrapper then guarantee proper document close
+      // Part 3: strip wrapper, then hardcode Calendly + footer + script (never let Claude truncate these)
       const p3base = stripWrapper(p3Text);
-      const p3 = p3base.trimEnd() + "\n</body>\n</html>";
+      const calendlySection = `
+<section id="agendar" style="padding:80px 24px;text-align:center;background:rgba(80,112,176,0.04);border-top:1px solid rgba(80,112,176,0.15);">
+  <div style="max-width:800px;margin:0 auto;">
+    <p style="font-family:'Manrope',sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#5070b0;margin-bottom:12px;">08 — AGENDAR</p>
+    <h2 style="font-family:'Manrope',sans-serif;font-size:clamp(22px,4vw,32px);font-weight:700;color:#fff;margin-bottom:8px;">Agende sua sessão estratégica gratuita</h2>
+    <p style="font-family:'Manrope',sans-serif;font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:40px;">Sem compromisso. 30 minutos que podem mudar o rumo do seu escritório.</p>
+    <div class="calendly-inline-widget" data-url="${calendlyUrl}" style="min-width:320px;height:700px;border-radius:16px;overflow:hidden;"></div>
+    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+  </div>
+</section>`;
+      const footer = `
+<footer style="padding:40px 24px;border-top:1px solid rgba(255,255,255,0.05);text-align:center;">
+  <p style="font-family:'Manrope',sans-serif;font-size:12px;color:rgba(255,255,255,0.25);">${lead.nome} × Agência Avestra &nbsp;·&nbsp; ${new Date().toLocaleDateString("pt-BR")} &nbsp;·&nbsp; Proposta confidencial</p>
+</footer>`;
+      const revealScript = `
+<script>
+  const _obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('active'); _obs.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => _obs.observe(el));
+</script>`;
+      const p3 = p3base.trimEnd() + calendlySection + footer + revealScript + "\n</body>\n</html>";
 
       const htmlClean = p1 + "\n" + p2 + "\n" + p3;
 
