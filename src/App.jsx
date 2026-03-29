@@ -692,7 +692,8 @@ JSON exato:
         .compare-table th { color: #5070b0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px; }
         .compare-table .bad { color: #ef4444; } .compare-table .good { color: #22c55e; }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #000; } ::-webkit-scrollbar-thumb { background: #5070b0; border-radius: 3px; }
-        @media (max-width: 768px) { .pilares-grid { grid-template-columns: 1fr !important; } }`;
+        .pilares-grid { grid-auto-rows: min-content; }
+        @media (max-width: 767px) { .pilares-grid { grid-template-columns: 1fr !important; } }`;
 
     const leadCtx = `CONTEÚDO DA PROPOSTA (markdown):
 ${propostaEditada}
@@ -732,7 +733,7 @@ ${base}
 CONTINUAÇÃO DO DOCUMENTO HTML — NÃO inclua DOCTYPE, html, head, body, CSS ou CDN scripts. Comece diretamente com as seções:
 
 1. Seção id="diferente": label "02 — POR QUE É DIFERENTE", compare-table bad/good com header azul
-2. Seção id="solucao": label "03 — A SOLUÇÃO", pilares-grid bento lg:grid-cols-3 (1º card lg:col-span-2), cada pilar-card: número glow-number, iconify icon, título, bullets benefícios, badge verde resultado
+2. Seção id="solucao": label "03 — A SOLUÇÃO", pilares-grid bento md:grid-cols-3 (1º card md:col-span-2 md:row-span-2; Pilar 5 md:col-span-2; Pilar 6 célula única — 6 pilares total), cada pilar-card: número glow-number, iconify icon, título, bullets benefícios, badge verde resultado
 3. Seção id="jornada": label "04 — JORNADA", timeline-line com dots azuis circulares, steps numerados, linha conectora
 4. Seção id="cronograma": label "05 — CRONOGRAMA", grid 2x2 phase-cards com top bar gradient azul, fase + período + milestones lista
 
